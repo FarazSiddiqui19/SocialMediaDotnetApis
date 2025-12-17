@@ -7,7 +7,7 @@ namespace SocialMedia.Data.Repository.Interfaces
         Task<Users?> GetUserByIdAsync(Guid userId);
         Task AddUserAsync(Users user);
 
-        Task<bool> UpdateUserAsync(Guid userId);
+        Task<bool> UpdateUserAsync(Users user);
 
         Task<bool> DeleteUserAsync(Guid userId);
 
