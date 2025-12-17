@@ -18,7 +18,6 @@ namespace SocialMedia.Controllers
        
 
         [HttpGet]
-        [Route("/users")]
         public async Task<IActionResult> GetUsers()
         {
             var users = await _context.Users.Include(u => u.Posts).ToListAsync();
