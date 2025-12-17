@@ -9,7 +9,7 @@ namespace SocialMedia.Data.Repository.Interfaces
 
         Task<bool> UpdateUserAsync(Users user);
 
-        Task<bool> DeleteUserAsync(Guid userId);
+        Task<bool> DeleteUserAsync(Users user);
 
     }
 }

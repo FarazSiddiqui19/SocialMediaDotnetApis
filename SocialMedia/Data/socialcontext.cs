@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.models;
 
 namespace SocialMedia.Data
 {
@@ -7,7 +8,7 @@ namespace SocialMedia.Data
         public SocialContext(DbContextOptions<SocialContext> options) : base(options)
         {
         }
-        public DbSet<models.Users> Users { get; set; }
-        public DbSet<models.Posts> Posts { get; set; }
+        public DbSet<Users> Users { get; set; }
+        public DbSet<Posts> Posts { get; set; }
     }
 }
