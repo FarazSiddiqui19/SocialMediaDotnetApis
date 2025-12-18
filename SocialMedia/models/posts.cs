@@ -9,7 +9,7 @@ namespace SocialMedia.models
         [Key] public Guid PostId { get; set; }
 
         public Guid UserId { get; set; }
-        public required Users User { get; set; }
+        
 
 
     }

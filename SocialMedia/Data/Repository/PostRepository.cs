@@ -45,5 +45,10 @@ namespace SocialMedia.Data.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<Posts>> GetPostsByUserIdAsync(Guid userId)
+        {
+            return await _Posts.Where(post => post.UserId == userId).ToListAsync();
+        }
     }
 }

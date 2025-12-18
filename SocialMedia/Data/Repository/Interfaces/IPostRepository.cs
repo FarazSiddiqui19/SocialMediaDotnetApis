@@ -9,5 +9,7 @@ namespace SocialMedia.Data.Repository.Interfaces
         Task AddPostAsync(Posts post);
         Task<bool> UpdatePostAsync(Posts posts);
         Task<bool> DeletePostAsync(Posts post);
+
+        Task<List<Posts>> GetPostsByUserIdAsync(Guid userId);
     }
 }
