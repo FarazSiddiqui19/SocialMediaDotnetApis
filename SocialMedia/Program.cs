@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using SocialMedia.Data.Repository;
+using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.Services;
+using SocialMedia.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +21,15 @@ builder.Services.AddDbContext<SocialMedia.Data.SocialContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddScoped<IUsersServices, UserServices>();
+builder.Services.AddScoped<IPostsServices, PostServices>();
+
+
+builder.Services.AddScoped<IUserRepository, UsersRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+
 
 var app = builder.Build();
 
