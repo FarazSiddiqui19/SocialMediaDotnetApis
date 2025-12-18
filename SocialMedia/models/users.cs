@@ -8,6 +8,5 @@ namespace SocialMedia.models
 
         public required string Username { get; set; }
 
-        public ICollection<Posts> Posts { get; set; } = new List<Posts>();
     }
 }

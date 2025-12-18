@@ -10,5 +10,15 @@ namespace SocialMedia.Data
         }
         public DbSet<Users> Users { get; set; }
         public DbSet<Posts> Posts { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Posts>()
+                .HasOne<Users>()
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
     }
 }

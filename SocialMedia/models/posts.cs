@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace SocialMedia.models
 {
@@ -9,7 +10,10 @@ namespace SocialMedia.models
         [Key] public Guid PostId { get; set; }
 
         public Guid UserId { get; set; }
-        
+
+       
+
+
 
 
     }

@@ -55,18 +55,11 @@ namespace SocialMedia.Migrations
 
             modelBuilder.Entity("SocialMedia.models.Posts", b =>
                 {
-                    b.HasOne("SocialMedia.models.Users", "User")
-                        .WithMany("Posts")
+                    b.HasOne("SocialMedia.models.Users", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialMedia.models.Users", b =>
-                {
-                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }

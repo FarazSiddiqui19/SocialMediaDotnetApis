@@ -29,6 +29,9 @@ namespace SocialMedia.Controllers
         [HttpGet("/id")]
         public async Task<IActionResult> GetUserByID(Guid UserId) {
             var user = await _usersService.GetUserByIdAsync(UserId);
+            if (user == null) {
+                return NotFound();
+            }   
             return Ok(user);
         }
 
