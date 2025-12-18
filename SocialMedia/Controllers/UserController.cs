@@ -26,7 +26,7 @@ namespace SocialMedia.Controllers
             return Ok(userlist);
         }
 
-        [HttpGet("/id")]
+        [HttpGet("id")]
         public async Task<IActionResult> GetUserByID(Guid UserId) {
             var user = await _usersService.GetUserByIdAsync(UserId);
             if (user == null) {
@@ -42,11 +42,13 @@ namespace SocialMedia.Controllers
             return Created();
         }
 
-        [HttpPost("/id")]
+        [HttpPost("id")]
         public async Task<IActionResult> DeleteUser(Guid UserId) {
             await _usersService.DeleteUserAsync(UserId);
             return Ok();
         }
+
+        
 
 
 
