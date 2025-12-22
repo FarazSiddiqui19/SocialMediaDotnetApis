@@ -53,8 +53,12 @@ namespace SocialMedia.Controllers
             return NoContent();
         }
 
-        
 
+        [HttpPatch("{UserId:guid}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] Guid UserId) {
+           
+            return NoContent();
+        }
 
 
 

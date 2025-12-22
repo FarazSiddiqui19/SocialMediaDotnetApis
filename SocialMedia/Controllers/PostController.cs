@@ -50,5 +50,13 @@ namespace SocialMedia.Controllers
             await _postService.DeletePostAsync(PostId);
             return NoContent();
         }
+
+
+        [HttpPatch("{PostId:guid}")]
+        public async Task<IActionResult> UpdatePost([FromRoute] Guid PostId)
+        {
+           
+            return NoContent();
+        }
     }
 }
