@@ -26,11 +26,15 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> CreatePost(AddPostsDTO postDto)
         {
             var createdPost = await _postService.CreatePostAsync(postDto);
-            return Created();
+            return CreatedAtAction(
+                nameof(GetPostByID),
+                new { PostId = createdPost.PostId },
+                createdPost
+            );
         }
 
-        [HttpGet("id")]
-        public async Task<IActionResult> GetPostByID(Guid PostId)
+        [HttpGet("{PostId:guid}")]
+        public async Task<IActionResult> GetPostByID([FromRoute]Guid PostId)
         {
             var post = await _postService.GetPostByIdAsync(PostId);
             if (post == null)
@@ -40,11 +44,11 @@ namespace SocialMedia.Controllers
             return Ok(post);
         }
 
-        [HttpPost("id")]
-        public async Task<IActionResult> DeletePost(Guid PostId)
+        [HttpDelete("{PostId:guid}")]
+        public async Task<IActionResult> DeletePost([FromRoute] Guid PostId)
         {
             await _postService.DeletePostAsync(PostId);
-            return Ok();
+            return NoContent();
         }
     }
 }
