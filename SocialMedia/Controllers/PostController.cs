@@ -6,7 +6,7 @@ namespace SocialMedia.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PostController : Controller
+    public class PostController : ControllerBase
     {
         private readonly IPostsServices _postService;
 
@@ -23,7 +23,7 @@ namespace SocialMedia.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePost(AddPostsDTO postDto)
+        public async Task<IActionResult> CreatePost( [FromBody]AddPostsDTO postDto)
         {
             var createdPost = await _postService.CreatePostAsync(postDto);
             return CreatedAtAction(

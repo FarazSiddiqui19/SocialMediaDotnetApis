@@ -1,4 +1,5 @@
 ﻿using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO.Users;
 using SocialMedia.Services.Interfaces;
@@ -12,28 +13,12 @@ namespace SocialMedia.Services
             _userRepository = userRepository;
         }
 
-       public Users  AddToUser(AddUsersDTO dto)
-        {
-            return new Users
-            {
-                UserId = Guid.NewGuid(),
-                Username = dto.Username
-            };
-        }
-
-        public VeiwUsersDTO  UserToVeiwUsersDTO(Users user)
-        {
-            return new VeiwUsersDTO
-            {
-              
-                Username = user.Username
-            };
-        }
+       
         public async Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto)
         {
-            var user = AddToUser(dto);
+            var user = dto.ToUser();
             await _userRepository.AddUserAsync(user);
-            return UserToVeiwUsersDTO(user);
+            return user.Toveiw();
 
         }
 
@@ -55,7 +40,7 @@ namespace SocialMedia.Services
         {
             var users = await _userRepository.GetAllUsersAsync();
             return users
-                   .Select(user => UserToVeiwUsersDTO(user))
+                   .Select(user => user.Toveiw())
                    .ToList();
 
         }
@@ -67,7 +52,7 @@ namespace SocialMedia.Services
             if (user == null)
                 return null;
 
-            return UserToVeiwUsersDTO(user);
+            return user.Toveiw();
         }
     }
 }
