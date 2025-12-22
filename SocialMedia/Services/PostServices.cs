@@ -1,4 +1,5 @@
 ﻿using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO.Posts;
 using SocialMedia.Services.Interfaces;
@@ -15,28 +16,14 @@ namespace SocialMedia.Services
             _userRepository = userRepository;
         }
 
-        public Posts AddToPost(AddPostsDTO dto) {
-            return new Posts
-            {
-                UserId = dto.UserId,
-
-            };
-        }
-
-        public VeiwPostsDTO PostToVeiwPostsDTO(Posts post) {
-            return new VeiwPostsDTO
-            {
-               
-            };
-        }
 
         public async Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto)
         {
             var userExists = await _userRepository.GetUserByIdAsync(dto.UserId);
-            var post = AddToPost(dto);
+            var post = dto.ToPost();
              await _postRepository.AddPostAsync(post);
 
-            return PostToVeiwPostsDTO(post);
+            return post.Toveiw();
 
         }
 
@@ -55,7 +42,7 @@ namespace SocialMedia.Services
         public async Task<List<VeiwPostsDTO>> GetAllPostsAsync()
         {
             var posts = await  _postRepository.GetAllPostsAsync();
-            return posts.Select(post => PostToVeiwPostsDTO(post)).ToList();
+            return posts.Select(post => post.Toveiw()).ToList();
         }
 
         public async Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id)
@@ -65,14 +52,14 @@ namespace SocialMedia.Services
             {
                 return null;
             }
-            return PostToVeiwPostsDTO(post);
+            return post.Toveiw();
         }
 
         public async Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
         {
             var posts =  await _postRepository.GetPostsByUserIdAsync(userId);
             
-            return posts.Select(PostToVeiwPostsDTO).ToList();
+            return posts.Select(posts => posts.Toveiw()).ToList();
 
 
         }
