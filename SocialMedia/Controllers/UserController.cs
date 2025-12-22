@@ -9,7 +9,7 @@ namespace SocialMedia.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
         private readonly IUsersServices _usersService;
         public UserController(IUsersServices UserServices)
@@ -26,8 +26,8 @@ namespace SocialMedia.Controllers
             return Ok(userlist);
         }
 
-        [HttpGet("id")]
-        public async Task<IActionResult> GetUserByID(Guid UserId) {
+        [HttpGet("{UserId:guid}")]
+        public async Task<IActionResult> GetUserByID([FromRoute] Guid UserId) {
             var user = await _usersService.GetUserByIdAsync(UserId);
             if (user == null) {
                 return NotFound();
@@ -37,15 +37,20 @@ namespace SocialMedia.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(AddUsersDTO user) {
-            await _usersService.CreateUserAsync(user);
-            return Created();
+        public async Task<IActionResult> CreateUser([FromBody] AddUsersDTO user) {
+            var createdUser = await _usersService.CreateUserAsync(user);
+
+            return CreatedAtAction(
+                    nameof(GetUserByID),
+                    new { UserId = createdUser.Id },
+                    createdUser
+            );
         }
 
-        [HttpPost("id")]
-        public async Task<IActionResult> DeleteUser(Guid UserId) {
+        [HttpDelete("{UserId:guid}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] Guid UserId) {
             await _usersService.DeleteUserAsync(UserId);
-            return Ok();
+            return NoContent();
         }
 
         
