@@ -24,7 +24,8 @@ namespace SocialMedia.mappers
             {
                 UserId = post.UserId,
                 PostId = post.PostId,
-                Title = post.Title
+                Title = post.Title,
+                CreatedAt = post.CreatedAt
 
             };
         }
