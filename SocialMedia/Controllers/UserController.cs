@@ -21,23 +21,27 @@ namespace SocialMedia.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get() {
+        public async Task<IActionResult> Get()
+        {
             var userlist = await _usersService.GetAllUsersAsync();
             return Ok(userlist);
         }
 
         [HttpGet("{UserId:guid}")]
-        public async Task<IActionResult> GetUserByID([FromRoute] Guid UserId) {
+        public async Task<IActionResult> GetUserByID([FromRoute] Guid UserId)
+        {
             var user = await _usersService.GetUserByIdAsync(UserId);
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound();
-            }   
+            }
             return Ok(user);
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] AddUsersDTO user) {
+        public async Task<IActionResult> CreateUser([FromBody] AddUsersDTO user)
+        {
             var createdUser = await _usersService.CreateUserAsync(user);
 
             return CreatedAtAction(
@@ -48,21 +52,30 @@ namespace SocialMedia.Controllers
         }
 
         [HttpDelete("{UserId:guid}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] Guid UserId) {
+        public async Task<IActionResult> DeleteUser([FromRoute] Guid UserId)
+        {
             await _usersService.DeleteUserAsync(UserId);
             return NoContent();
         }
 
 
         [HttpPatch("{UserId:guid}")]
-        public async Task<IActionResult> UpdateUser([FromRoute] Guid UserId) {
-           
+        public async Task<IActionResult> UpdateUser([FromRoute] Guid UserId)
+        {
+
             return NoContent();
         }
 
+        [HttpPut("{UserId:guid}")]
+        public async Task<IActionResult> UpdateUserPut([FromRoute] Guid UserId, [FromBody] AddUsersDTO updatedUser)
+        {
+            var user = await _usersService.UpdateUserAsync(UserId, updatedUser);
+            if (user == false)
+            {
+                return NotFound();
+            }
+            return NoContent();
 
-
-
-
+        }
     }
 }

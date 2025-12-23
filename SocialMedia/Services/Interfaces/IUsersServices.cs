@@ -8,5 +8,6 @@ namespace SocialMedia.Services.Interfaces
         Task<List<VeiwUsersDTO>> GetAllUsersAsync();
         Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id);
         Task<bool> DeleteUserAsync(Guid id);
+        Task<bool> UpdateUserAsync(Guid id, AddUsersDTO dto);
     }
 }

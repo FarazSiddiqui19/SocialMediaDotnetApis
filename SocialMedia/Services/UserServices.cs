@@ -54,5 +54,17 @@ namespace SocialMedia.Services
 
             return user.Toveiw();
         }
+
+        public async Task<bool> UpdateUserAsync(Guid id, AddUsersDTO dto)
+        {
+            var existingUser = await _userRepository.GetUserByIdAsync(id);
+            if (existingUser == null)
+            {
+                return false;
+            }
+            existingUser.Username = dto.Username;
+            await _userRepository.UpdateUserAsync(existingUser);
+            return true;
+        }
     }
 }
