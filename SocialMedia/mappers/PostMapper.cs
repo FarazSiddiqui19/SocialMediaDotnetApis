@@ -11,6 +11,9 @@ namespace SocialMedia.mappers
             return new Posts
             {
                 UserId = dto.UserId,
+                PostId = Guid.NewGuid(),
+                Title = dto.Title,
+                CreatedAt = DateTime.UtcNow
 
             };
         }
@@ -20,7 +23,9 @@ namespace SocialMedia.mappers
             return new VeiwPostsDTO
             {
                 UserId = post.UserId,
-                PostId = post.PostId
+                PostId = post.PostId,
+                Title = post.Title
+
             };
         }
 
