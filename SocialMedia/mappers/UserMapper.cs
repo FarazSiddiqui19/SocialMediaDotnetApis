@@ -18,6 +18,7 @@ namespace SocialMedia.mappers
         {
             return new VeiwUsersDTO
             {
+                Id = user.UserId,
                 Username = user.Username
             };
         }

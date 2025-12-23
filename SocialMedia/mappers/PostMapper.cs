@@ -19,7 +19,8 @@ namespace SocialMedia.mappers
         {
             return new VeiwPostsDTO
             {
-
+                UserId = post.UserId,
+                PostId = post.PostId
             };
         }
 
