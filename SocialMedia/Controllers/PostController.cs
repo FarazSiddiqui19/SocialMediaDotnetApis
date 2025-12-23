@@ -52,10 +52,15 @@ namespace SocialMedia.Controllers
         }
 
 
-        [HttpPatch("{PostId:guid}")]
-        public async Task<IActionResult> UpdatePost([FromRoute] Guid PostId)
+        [HttpPut("{PostId:guid}")]
+        public async Task<IActionResult> UpdatePost([FromRoute] Guid PostId,[FromBody] AddPostsDTO updt)
         {
-           
+           var post = await _postService.GetPostByIdAsync(PostId);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            await _postService.UpdatePostAsync(PostId, updt);
             return NoContent();
         }
     }

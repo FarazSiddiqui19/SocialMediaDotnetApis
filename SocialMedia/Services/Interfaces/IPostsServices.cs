@@ -13,5 +13,7 @@ namespace SocialMedia.Services.Interfaces
         Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id);
 
         Task<bool> DeletePostAsync(Guid id);
+
+        Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto);
     }
 }

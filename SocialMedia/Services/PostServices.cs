@@ -11,7 +11,8 @@ namespace SocialMedia.Services
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
 
-        public PostServices(IPostRepository postRepository  , IUserRepository userRepository) { 
+        public PostServices(IPostRepository postRepository, IUserRepository userRepository)
+        {
             _postRepository = postRepository;
             _userRepository = userRepository;
         }
@@ -21,7 +22,7 @@ namespace SocialMedia.Services
         {
             var userExists = await _userRepository.GetUserByIdAsync(dto.UserId);
             var post = dto.ToPost();
-             await _postRepository.AddPostAsync(post);
+            await _postRepository.AddPostAsync(post);
 
             return post.Toveiw();
 
@@ -29,19 +30,19 @@ namespace SocialMedia.Services
 
         public async Task<bool> DeletePostAsync(Guid id)
         {
-            var posts =  await _postRepository.GetPostByIdAsync(id);
+            var posts = await _postRepository.GetPostByIdAsync(id);
 
-            if(posts == null)
+            if (posts == null)
             {
                 return false;
             }
-            
+
             return await _postRepository.DeletePostAsync(posts);
         }
 
         public async Task<List<VeiwPostsDTO>> GetAllPostsAsync()
         {
-            var posts = await  _postRepository.GetAllPostsAsync();
+            var posts = await _postRepository.GetAllPostsAsync();
             return posts.Select(post => post.Toveiw()).ToList();
         }
 
@@ -57,11 +58,23 @@ namespace SocialMedia.Services
 
         public async Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
         {
-            var posts =  await _postRepository.GetPostsByUserIdAsync(userId);
-            
+            var posts = await _postRepository.GetPostsByUserIdAsync(userId);
+
             return posts.Select(posts => posts.Toveiw()).ToList();
 
 
+        }
+
+        public async Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto)
+        {
+            var existingPost = await _postRepository.GetPostByIdAsync(id);
+            if (existingPost == null)
+            {
+                return false;
+            }
+
+            existingPost.Title = dto.Title;
+            return await _postRepository.UpdatePostAsync(existingPost);
         }
     }
 }
