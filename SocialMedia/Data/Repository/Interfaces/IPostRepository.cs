@@ -4,7 +4,7 @@ namespace SocialMedia.Data.Repository.Interfaces
     public interface IPostRepository
     {
        
-        Task<List<Posts>> GetAllPostsAsync();
+        Task<List<Posts>> GetAllPostsAsync(string? Title);
         Task<Posts?> GetPostByIdAsync(Guid postId);
         Task AddPostAsync(Posts post);
         Task<bool> UpdatePostAsync(Posts posts);

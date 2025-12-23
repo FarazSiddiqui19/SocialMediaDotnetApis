@@ -40,9 +40,9 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(posts);
         }
 
-        public async Task<List<VeiwPostsDTO>> GetAllPostsAsync()
+        public async Task<List<VeiwPostsDTO>> GetAllPostsAsync(string? Title)
         {
-            var posts = await _postRepository.GetAllPostsAsync();
+            var posts = await _postRepository.GetAllPostsAsync(Title);
             return posts.Select(post => post.Toveiw()).ToList();
         }
 

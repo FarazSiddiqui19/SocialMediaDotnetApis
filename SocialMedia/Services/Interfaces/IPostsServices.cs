@@ -6,7 +6,7 @@ namespace SocialMedia.Services.Interfaces
     {
         Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto);
 
-        Task<List<VeiwPostsDTO>> GetAllPostsAsync();
+        Task<List<VeiwPostsDTO>> GetAllPostsAsync(string? Title);
         Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId);
 
 

@@ -28,9 +28,14 @@ namespace SocialMedia.Data.Repository
             return true;
         }
 
-        public async Task<List<Posts>> GetAllPostsAsync()
+        public async Task<List<Posts>> GetAllPostsAsync(string? Title)
         {
-            return await _Posts.ToListAsync();
+            if(Title == null)
+                return await _Posts.ToListAsync();
+
+            return await _Posts
+                        .Where(post => post.Title!.Contains(Title))
+                        .ToListAsync();
         }
 
         public async Task<Posts?> GetPostByIdAsync(Guid postId)
