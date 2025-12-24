@@ -8,10 +8,12 @@ namespace SocialMedia.Data.Repository
     {
         private readonly SocialContext _context;
         private readonly DbSet<Posts> _Posts;
+        private IQueryable<Posts> _QueryPosts;
         public PostRepository(SocialContext context)
         {
             _context = context;
             _Posts = _context.Posts;
+            _QueryPosts = context.Posts.AsQueryable();
 
         }
         public async Task AddPostAsync(Posts post)
@@ -30,12 +32,15 @@ namespace SocialMedia.Data.Repository
 
         public async Task<List<Posts>> GetAllPostsAsync(string? Title)
         {
-            if(Title == null)
+            if (string.IsNullOrEmpty(Title))
+            {
                 return await _Posts.ToListAsync();
+            }
 
-            return await _Posts
-                        .Where(post => post.Title!.Contains(Title))
-                        .ToListAsync();
+
+            return  await _QueryPosts.Where(post => post.Title!.Contains(Title)).ToListAsync();
+
+
         }
 
         public async Task<Posts?> GetPostByIdAsync(Guid postId)
