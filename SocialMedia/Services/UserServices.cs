@@ -3,14 +3,18 @@ using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO.Users;
 using SocialMedia.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace SocialMedia.Services
 {
     public class UserServices : IUsersServices
     {
         private readonly IUserRepository  _userRepository;
+       
         public UserServices(IUserRepository userRepository) {
             _userRepository = userRepository;
+          
         }
 
        
@@ -38,19 +42,17 @@ namespace SocialMedia.Services
 
         public async Task<List<VeiwUsersDTO>> GetAllUsersAsync(string? Username)
         {
+            var users = _userRepository.UserQuery();
 
             if (!string.IsNullOrEmpty(Username))
             {
-                var filteredUsers = await _userRepository.GetUsersByNameAsync(Username);
-                return filteredUsers
-                       .Select(user => user.Toveiw())
-                       .ToList();
-            }
-            var users = await _userRepository.GetAllUsersAsync();
-            return users
-                   .Select(user => user.Toveiw())
-                   .ToList();
+                users = users.Where(u => u.Username.Contains(Username));
 
+            }
+
+            return await users
+                .Select(u => u.Toveiw())
+                .ToListAsync();
         }
 
         public async Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id)

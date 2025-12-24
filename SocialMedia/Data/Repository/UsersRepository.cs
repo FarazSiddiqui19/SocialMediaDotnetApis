@@ -23,11 +23,14 @@ namespace SocialMedia.Data.Repository
 
         }
 
-        public async Task<List<Users>> GetUsersByNameAsync(string? Username) { 
-            if (Username == null) throw new ArgumentNullException(nameof(Username));
+        public async Task<List<Users>> GetUsersByNameAsync(string Username) { 
             return await _QueryUsers
                 .Where(users=>users.Username.Contains(Username))
                 .ToListAsync();
+        }
+
+        public IQueryable<Users> UserQuery() {
+            return _QueryUsers;
         }
 
         public async Task<Users?> GetUserByIdAsync(Guid userId) 

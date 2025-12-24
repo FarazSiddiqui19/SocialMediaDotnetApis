@@ -4,8 +4,9 @@ namespace SocialMedia.Data.Repository.Interfaces
     public interface IUserRepository
     {
         Task<List<Users>> GetAllUsersAsync();
+        IQueryable<Users> UserQuery();
 
-        Task<List<Users>> GetUsersByNameAsync(string? Username);
+        Task<List<Users>> GetUsersByNameAsync(string Username);
         Task<Users?> GetUserByIdAsync(Guid userId);
         Task AddUserAsync(Users user);
 
