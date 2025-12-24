@@ -17,18 +17,6 @@ namespace SocialMedia.Data.Repository
 
         }
 
-        public async Task<List<Users>> GetAllUsersAsync() { 
-           
-            return  await _Users.ToListAsync();
-
-        }
-
-        public async Task<List<Users>> GetUsersByNameAsync(string Username) { 
-            return await _QueryUsers
-                .Where(users=>users.Username.Contains(Username))
-                .ToListAsync();
-        }
-
         public IQueryable<Users> UserQuery() {
             return _QueryUsers;
         }

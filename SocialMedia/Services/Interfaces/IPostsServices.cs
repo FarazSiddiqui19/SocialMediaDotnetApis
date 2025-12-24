@@ -15,5 +15,7 @@ namespace SocialMedia.Services.Interfaces
         Task<bool> DeletePostAsync(Guid id);
 
         Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto);
+
+
     }
 }

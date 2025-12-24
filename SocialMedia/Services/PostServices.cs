@@ -1,4 +1,5 @@
-﻿using SocialMedia.Data.Repository.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO.Posts;
@@ -42,8 +43,16 @@ namespace SocialMedia.Services
 
         public async Task<List<VeiwPostsDTO>> GetAllPostsAsync(string? Title)
         {
-            var posts = await _postRepository.GetAllPostsAsync(Title);
-            return posts.Select(post => post.Toveiw()).ToList();
+            var posts = _postRepository.PostQuery();
+
+            if (!string.IsNullOrWhiteSpace(Title))
+            {
+                posts = posts.Where(p => p.Title.Contains(Title));
+            }
+
+            return await posts
+                .Select(p => p.Toveiw())
+                .ToListAsync();
         }
 
         public async Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id)
@@ -76,5 +85,7 @@ namespace SocialMedia.Services
             existingPost.Title = dto.Title;
             return await _postRepository.UpdatePostAsync(existingPost);
         }
+
+       
     }
 }

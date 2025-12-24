@@ -11,5 +11,7 @@ namespace SocialMedia.Data.Repository.Interfaces
         Task<bool> DeletePostAsync(Posts post);
 
         Task<List<Posts>> GetPostsByUserIdAsync(Guid userId);
+
+        IQueryable<Posts> PostQuery();
     }
 }

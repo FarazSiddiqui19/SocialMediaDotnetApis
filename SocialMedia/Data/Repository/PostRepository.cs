@@ -60,5 +60,10 @@ namespace SocialMedia.Data.Repository
         {
             return await _Posts.Where(post => post.UserId == userId).ToListAsync();
         }
+
+        public IQueryable<Posts> PostQuery()
+        {
+            return _QueryPosts;
+        }
     }
 }
