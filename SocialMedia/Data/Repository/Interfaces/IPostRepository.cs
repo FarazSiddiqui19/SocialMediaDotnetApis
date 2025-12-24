@@ -4,14 +4,11 @@ namespace SocialMedia.Data.Repository.Interfaces
     public interface IPostRepository
     {
        
-        Task<List<Posts>> GetAllPostsAsync(string? Title);
+       
         Task<Posts?> GetPostByIdAsync(Guid postId);
         Task AddPostAsync(Posts post);
         Task<bool> UpdatePostAsync(Posts posts);
         Task<bool> DeletePostAsync(Posts post);
-
-        Task<List<Posts>> GetPostsByUserIdAsync(Guid userId);
-
         IQueryable<Posts> PostQuery();
     }
 }

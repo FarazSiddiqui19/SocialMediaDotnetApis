@@ -30,18 +30,7 @@ namespace SocialMedia.Data.Repository
             return true;
         }
 
-        public async Task<List<Posts>> GetAllPostsAsync(string? Title)
-        {
-            if (string.IsNullOrEmpty(Title))
-            {
-                return await _Posts.ToListAsync();
-            }
-
-
-            return  await _QueryPosts.Where(post => post.Title!.Contains(Title)).ToListAsync();
-
-
-        }
+  
 
         public async Task<Posts?> GetPostByIdAsync(Guid postId)
         {
@@ -56,10 +45,7 @@ namespace SocialMedia.Data.Repository
             return true;
         }
 
-        public async Task<List<Posts>> GetPostsByUserIdAsync(Guid userId)
-        {
-            return await _Posts.Where(post => post.UserId == userId).ToListAsync();
-        }
+      
 
         public IQueryable<Posts> PostQuery()
         {

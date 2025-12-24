@@ -67,9 +67,11 @@ namespace SocialMedia.Services
 
         public async Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
         {
-            var posts = await _postRepository.GetPostsByUserIdAsync(userId);
 
-            return posts.Select(posts => posts.Toveiw()).ToList();
+            var post = _postRepository.PostQuery()
+                                         .Where(p => p.UserId == userId);
+
+            return post.Select(posts => posts.Toveiw()).ToList();
 
 
         }
