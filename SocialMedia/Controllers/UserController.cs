@@ -21,9 +21,9 @@ namespace SocialMedia.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] string? Username)
         {
-            var userlist = await _usersService.GetAllUsersAsync();
+            var userlist = await _usersService.GetAllUsersAsync(Username);
             return Ok(userlist);
         }
 

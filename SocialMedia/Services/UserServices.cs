@@ -36,8 +36,16 @@ namespace SocialMedia.Services
             return true;
         }
 
-        public async Task<List<VeiwUsersDTO>> GetAllUsersAsync()
+        public async Task<List<VeiwUsersDTO>> GetAllUsersAsync(string? Username)
         {
+
+            if (!string.IsNullOrEmpty(Username))
+            {
+                var filteredUsers = await _userRepository.GetUsersByNameAsync(Username);
+                return filteredUsers
+                       .Select(user => user.Toveiw())
+                       .ToList();
+            }
             var users = await _userRepository.GetAllUsersAsync();
             return users
                    .Select(user => user.Toveiw())

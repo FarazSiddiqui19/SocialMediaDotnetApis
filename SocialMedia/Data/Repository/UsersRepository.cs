@@ -9,15 +9,25 @@ namespace SocialMedia.Data.Repository
     {
         private readonly SocialContext _context;
         private readonly DbSet<Users> _Users;
+        private IQueryable<Users> _QueryUsers;
         public UsersRepository(SocialContext context) {
             _context = context;
             _Users = _context.Users;
+            _QueryUsers = context.Users.AsQueryable();
 
         }
 
         public async Task<List<Users>> GetAllUsersAsync() { 
-           return  await _Users.ToListAsync();
+           
+            return  await _Users.ToListAsync();
 
+        }
+
+        public async Task<List<Users>> GetUsersByNameAsync(string? Username) { 
+            if (Username == null) throw new ArgumentNullException(nameof(Username));
+            return await _QueryUsers
+                .Where(users=>users.Username.Contains(Username))
+                .ToListAsync();
         }
 
         public async Task<Users?> GetUserByIdAsync(Guid userId) 
