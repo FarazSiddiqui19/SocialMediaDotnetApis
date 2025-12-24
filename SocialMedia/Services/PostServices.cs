@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
+using SocialMedia.models.DTO;
 using SocialMedia.models.DTO.Posts;
 using SocialMedia.Services.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SocialMedia.Services
 {
@@ -41,7 +44,7 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(posts);
         }
 
-        public async Task<List<VeiwPostsDTO>> GetAllPostsAsync(string? Title)
+        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize)
         {
             var posts = _postRepository.PostQuery();
 
@@ -50,10 +53,25 @@ namespace SocialMedia.Services
                 posts = posts.Where(p => p.Title.Contains(Title));
             }
 
-            return await posts
-                .Select(p => p.Toveiw())
-                .ToListAsync();
-        }
+            var totalCount = await posts.CountAsync();
+
+            var result = await posts
+                          .OrderByDescending(p => p.CreatedAt)
+                          .Skip((page - 1) * pageSize)
+                          .Take(pageSize)
+                          .Select(p => p.Toveiw())
+                          .ToListAsync();
+
+            return new PagedResults<VeiwPostsDTO>
+            {
+                Items = result,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+           }
+
+       
 
         public async Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id)
         {

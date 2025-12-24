@@ -16,9 +16,9 @@ namespace SocialMedia.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery]string? Title)
+        public async Task<IActionResult> Get([FromQuery]string? Title,int page=2, int pagesize = 1)
         {
-            var postList = await _postService.GetAllPostsAsync(Title);
+            var postList = await _postService.GetAllPostsAsync(Title,page,pagesize);
             return Ok(postList);
         }
 

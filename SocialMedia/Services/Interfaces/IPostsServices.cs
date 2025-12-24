@@ -1,4 +1,5 @@
-﻿using SocialMedia.models.DTO.Posts;
+﻿using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.Posts;
 
 namespace SocialMedia.Services.Interfaces
 {
@@ -6,7 +7,7 @@ namespace SocialMedia.Services.Interfaces
     {
         Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto);
 
-        Task<List<VeiwPostsDTO>> GetAllPostsAsync(string? Title);
+        Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize);
         Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId);
 
 
