@@ -111,6 +111,7 @@ namespace SocialMedia.Services
             }
 
             existingPost.Title = dto.Title;
+            existingPost.Content = PostContentBuilder.Build(dto.Body);
             return await _postRepository.UpdatePostAsync(existingPost);
         }
 

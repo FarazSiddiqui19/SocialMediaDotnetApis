@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.models.DTO.Posts
+﻿using System.Text.Json;
+
+namespace SocialMedia.models.DTO.Posts
 {
     public class VeiwPostsDTO
     {
@@ -6,6 +8,10 @@
         public Guid UserId { get; set; }
 
         public required string Title { get; set; }
+
+        public JsonElement Body {  get; set; }
+
+        public int WordCount { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
