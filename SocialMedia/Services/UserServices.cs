@@ -41,7 +41,7 @@ namespace SocialMedia.Services
             return true;
         }
 
-        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize)
+        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize, SortingOrder ord)
         {
             var users = _userRepository.UserQuery();
 
@@ -51,10 +51,18 @@ namespace SocialMedia.Services
 
             }
 
+            if(ord == SortingOrder.Desc)
+            {
+                users = users.OrderByDescending(u => u.Username);
+            }
+            else
+            {
+                users = users.OrderBy(u => u.Username);
+            }
+
             var totalCount = await users.CountAsync();
 
             var result = await users
-                .OrderBy(u => u.Username)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(u=>u.Toveiw())

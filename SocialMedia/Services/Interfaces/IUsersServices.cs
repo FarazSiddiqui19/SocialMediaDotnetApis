@@ -6,7 +6,7 @@ namespace SocialMedia.Services.Interfaces
     public interface IUsersServices
     {
         Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto);
-        Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize);
+        Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize,SortingOrder ord);
 
        
         Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id);

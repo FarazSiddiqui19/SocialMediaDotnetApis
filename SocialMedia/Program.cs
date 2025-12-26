@@ -1,15 +1,21 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SocialMedia.Data.Repository;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.Services;
 using SocialMedia.Services.Interfaces;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(
+        Options => { 
+            Options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        }
+    );
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

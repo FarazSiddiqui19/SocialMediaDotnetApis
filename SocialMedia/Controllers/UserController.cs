@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.models.DTO.Users;
+using SocialMedia.models.DTO;
 using SocialMedia.Services.Interfaces;
 
 
@@ -21,9 +22,9 @@ namespace SocialMedia.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get([FromQuery] string? Username,int page=1,int pagesize=2)
+        public async Task<IActionResult> Get([FromQuery] string? Username,int page=1,int pagesize=2,SortingOrder order=SortingOrder.Asc)
         {
-            var userlist = await _usersService.GetAllUsersAsync(Username,page,pagesize);
+            var userlist = await _usersService.GetAllUsersAsync(Username,page,pagesize, order);
             return Ok(userlist);
         }
 
