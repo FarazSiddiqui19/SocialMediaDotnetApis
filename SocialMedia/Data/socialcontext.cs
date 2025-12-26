@@ -18,6 +18,11 @@ namespace SocialMedia.Data
                 .WithMany()
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Posts>(entity =>
+            {
+                entity.Property(e => e.Content).HasColumnType("jsonb");
+            });
         }
 
     }

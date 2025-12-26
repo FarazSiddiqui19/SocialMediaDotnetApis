@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace SocialMedia.models
 {
@@ -12,6 +13,8 @@ namespace SocialMedia.models
         public Guid UserId { get; set; }
 
        public required string Title { get; set; }
+
+        public JsonDocument? Content { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
