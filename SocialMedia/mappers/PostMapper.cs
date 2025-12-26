@@ -31,7 +31,7 @@ namespace SocialMedia.mappers
                 UserId = post.UserId,
                 PostId = post.PostId,
                 Title = post.Title,
-                WordCount = meta.GetProperty("wordcount").GetInt32(),
+                WordCount = meta.GetProperty("wordCount").GetInt32(),
                 Body = body,
                 CreatedAt = post.CreatedAt
 
