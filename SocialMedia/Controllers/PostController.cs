@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SocialMedia.models.DTO;
 using SocialMedia.models.DTO.Posts;
 using SocialMedia.Services.Interfaces;
 
@@ -16,9 +17,9 @@ namespace SocialMedia.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery]string? Title,int page=2, int pagesize = 1)
+        public async Task<IActionResult> Get([FromQuery]string? Title,int page=2, int pagesize = 1, SortingOrder order=SortingOrder.Asc)
         {
-            var postList = await _postService.GetAllPostsAsync(Title,page,pagesize);
+            var postList = await _postService.GetAllPostsAsync(Title,page,pagesize, order);
             return Ok(postList);
         }
 

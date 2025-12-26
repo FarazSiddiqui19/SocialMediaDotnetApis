@@ -5,4 +5,10 @@
         Asc,
         Desc
     }
+
+    public enum  SortByValue
+    {
+        Username
+        
+    }
 }

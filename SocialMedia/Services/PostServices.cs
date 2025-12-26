@@ -44,19 +44,27 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(posts);
         }
 
-        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize)
+        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize, SortingOrder order)
         {
             var posts = _postRepository.PostQuery();
 
             if (!string.IsNullOrWhiteSpace(Title))
             {
-                posts = posts.Where(p => p.Title.Contains(Title));
+                posts = posts.Where(p => p.Title.ToLower().Contains(Title.ToLower()));
+            }
+
+            if(order == SortingOrder.Asc)
+            {
+                posts = posts.OrderBy(p => p.CreatedAt);
+            }
+            else
+            {
+                posts = posts.OrderByDescending(p => p.CreatedAt);
             }
 
             var totalCount = await posts.CountAsync();
 
             var result = await posts
-                          .OrderByDescending(p => p.CreatedAt)
                           .Skip((page - 1) * pageSize)
                           .Take(pageSize)
                           .Select(p => p.Toveiw())
