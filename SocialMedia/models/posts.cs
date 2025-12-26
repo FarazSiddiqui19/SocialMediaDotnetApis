@@ -14,7 +14,7 @@ namespace SocialMedia.models
 
        public required string Title { get; set; }
 
-        public JsonDocument? Content { get; set; }
+        public JsonDocument Content { get; set; }=default!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
