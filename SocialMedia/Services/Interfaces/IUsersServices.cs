@@ -1,11 +1,12 @@
-﻿using SocialMedia.models.DTO.Users;
+﻿using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.Users;
 
 namespace SocialMedia.Services.Interfaces
 {
     public interface IUsersServices
     {
         Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto);
-        Task<List<VeiwUsersDTO>> GetAllUsersAsync(string? Username);
+        Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize);
 
        
         Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id);

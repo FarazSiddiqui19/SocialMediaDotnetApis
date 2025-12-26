@@ -1,10 +1,11 @@
-﻿using SocialMedia.Data.Repository.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
+using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.Posts;
 using SocialMedia.models.DTO.Users;
 using SocialMedia.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace SocialMedia.Services
 {
@@ -40,19 +41,34 @@ namespace SocialMedia.Services
             return true;
         }
 
-        public async Task<List<VeiwUsersDTO>> GetAllUsersAsync(string? Username)
+        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize)
         {
             var users = _userRepository.UserQuery();
 
             if (!string.IsNullOrEmpty(Username))
             {
-                users = users.Where(u => u.Username.Contains(Username));
+                users = users.Where(u => u.Username.ToLower().Contains(Username.ToLower()));
 
             }
 
-            return await users
-                .Select(u => u.Toveiw())
+            var totalCount = await users.CountAsync();
+
+            var result = await users
+                .OrderBy(u => u.Username)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u=>u.Toveiw())
                 .ToListAsync();
+
+
+
+            return new PagedResults<VeiwUsersDTO>
+            {
+                Items = result,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id)
@@ -76,5 +92,7 @@ namespace SocialMedia.Services
             await _userRepository.UpdateUserAsync(existingUser);
             return true;
         }
+
+
     }
 }
