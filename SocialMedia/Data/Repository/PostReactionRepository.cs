@@ -5,7 +5,7 @@ using SocialMedia.models;
 
 namespace SocialMedia.Data.Repository
 {
-    public class PostReactionRepository
+    public class PostReactionRepository: IPostReactionRepository
     {
         private readonly SocialContext _context;
 

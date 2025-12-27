@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SocialMedia.models;
 using SocialMedia.models.DTO.PostReaction;
 using SocialMedia.Services.Interfaces;
 
 namespace SocialMedia.Controllers
 {
     [ApiController]
-    [Route("reaction/{postId}")]
+    [Route("reaction")]
     public class PostReactionController : ControllerBase
     {
         private readonly IPostReactionService _service;
@@ -17,15 +18,16 @@ namespace SocialMedia.Controllers
 
         [HttpPost]
         public async Task<IActionResult> React(
-            Guid postId,
-            [FromBody] ReactToPostDTO dto)
+            [FromBody] ReactToPostDTO dto
+            )
         {
-            if (postId != dto.PostId)
-                return BadRequest("PostId mismatch");
+           
 
             await _service.ToggleReactionAsync(dto);
             return Ok();
         }
+
+        
     }
 
 }
