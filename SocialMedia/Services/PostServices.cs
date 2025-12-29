@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
@@ -14,11 +15,14 @@ namespace SocialMedia.Services
     {
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IPostReactionRepository _reactionRepository;
 
-        public PostServices(IPostRepository postRepository, IUserRepository userRepository)
+
+        public PostServices(IPostRepository postRepository, IUserRepository userRepository, IPostReactionRepository reactionRepository)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
+            _reactionRepository = reactionRepository;
         }
 
 
@@ -28,7 +32,10 @@ namespace SocialMedia.Services
             var post = dto.ToPost();
             await _postRepository.AddPostAsync(post);
 
-            return post.Toveiw();
+            var upvotes = 0;
+            var downvotes = 0;
+
+            return post.Toveiw(upvotes, downvotes);
 
         }
 
@@ -44,32 +51,63 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(posts);
         }
 
-        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize, SortingOrder order)
+        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(
+                                                                    string? title,
+                                                                    int page,
+                                                                    int pageSize,
+                                                                    SortingOrder order)
         {
-            var posts = _postRepository.PostQuery();
+          
+            var postsQuery = _postRepository.PostQuery();
 
-            if (!string.IsNullOrWhiteSpace(Title))
+            
+            if (!string.IsNullOrWhiteSpace(title))
             {
-                posts = posts.Where(p => p.Title.ToLower().Contains(Title.ToLower()));
+                postsQuery = postsQuery
+                    .Where(p => p.Title.ToLower().Contains(title.ToLower()));
             }
 
-            if(order == SortingOrder.Asc)
+           
+            postsQuery = order == SortingOrder.Asc
+                ? postsQuery.OrderBy(p => p.CreatedAt)
+                : postsQuery.OrderByDescending(p => p.CreatedAt);
+
+            
+            var totalCount = await postsQuery.CountAsync();
+
+           
+            var posts =await  postsQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var postIds = posts.Select(p => p.PostId).ToList();
+
+           
+            var reactionCounts = await _reactionRepository
+                .GetPostReactionAsync()
+                .Where(r => postIds.Contains(r.PostId))
+                .GroupBy(r => r.PostId)
+                .Select(g => new
+                {
+                    PostId = g.Key,
+                    Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
+                    Downvotes = g.Count(r => r.Type == ReactionType.Downvote)
+                })
+                .ToDictionaryAsync(x => x.PostId);
+
+            
+            var result = posts.Select(p =>
             {
-                posts = posts.OrderBy(p => p.CreatedAt);
-            }
-            else
-            {
-                posts = posts.OrderByDescending(p => p.CreatedAt);
-            }
+                reactionCounts.TryGetValue(p.PostId, out var r);
 
-            var totalCount = await posts.CountAsync();
+                return p.Toveiw(
+                    r?.Upvotes ?? 0,
+                    r?.Downvotes ?? 0
+                );
+            }).ToList();
 
-            var result = await posts
-                          .Skip((page - 1) * pageSize)
-                          .Take(pageSize)
-                          .Select(p => p.Toveiw())
-                          .ToListAsync();
-
+           
             return new PagedResults<VeiwPostsDTO>
             {
                 Items = result,
@@ -77,27 +115,71 @@ namespace SocialMedia.Services
                 Page = page,
                 PageSize = pageSize
             };
-           }
+        }
 
-       
+
+
+
 
         public async Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id)
         {
             var post = await _postRepository.GetPostByIdAsync(id);
+
+            var reactionSummary = await _reactionRepository
+                                        .GetPostReactionAsync()
+                                        .Where(r => r.PostId == id)
+                                        .GroupBy(r => r.PostId)
+                                        .Select(g => new
+        {
+            Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
+            Downvotes = g.Count(r => r.Type == ReactionType.Downvote)
+        })
+        .FirstOrDefaultAsync();
+
+
+
+
             if (post == null)
             {
                 return null;
             }
-            return post.Toveiw();
+            return post.Toveiw(
+                    reactionSummary?.Upvotes ?? 0,
+                    reactionSummary?.Downvotes ?? 0
+                );
         }
 
         public async Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
         {
 
-            var post = _postRepository.PostQuery()
-                                         .Where(p => p.UserId == userId);
+            var post = await _postRepository
+                                .PostQuery()
+                                .Where(p => p.UserId == userId)
+                                .ToListAsync();
 
-            return post.Select(posts => posts.Toveiw()).ToList();
+            var postIds = post.Select(p => p.PostId).ToList();
+
+            var reactionCounts = await _reactionRepository
+                .GetPostReactionAsync()
+                .Where(r => postIds.Contains(r.PostId))
+                .GroupBy(r => r.PostId)
+                .Select(g => new
+                {
+                    PostId = g.Key,
+                    Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
+                    Downvotes = g.Count(r => r.Type == ReactionType.Downvote)
+                })
+                .ToDictionaryAsync(x => x.PostId);
+
+            return post.Select(p =>
+            {
+                reactionCounts.TryGetValue(p.PostId, out var r);
+
+                return p.Toveiw(
+                    r?.Upvotes ?? 0,
+                    r?.Downvotes ?? 0
+                );
+            }).ToList();
 
 
         }
@@ -115,6 +197,6 @@ namespace SocialMedia.Services
             return await _postRepository.UpdatePostAsync(existingPost);
         }
 
-       
+
     }
 }

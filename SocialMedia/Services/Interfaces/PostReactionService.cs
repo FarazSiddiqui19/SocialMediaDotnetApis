@@ -24,7 +24,7 @@ namespace SocialMedia.Services.Interfaces
             if (post == null)
                 throw new ArgumentException("Post not found");
 
-            var reactionquery = await _reactionRepo.GetPostReactionAsync();
+            var reactionquery = _reactionRepo.GetPostReactionAsync();
 
             var existingReaction = reactionquery
                 .FirstOrDefault(r => r.PostId == dto.PostId && r.UserId == dto.UserId);

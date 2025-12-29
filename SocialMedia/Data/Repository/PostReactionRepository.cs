@@ -14,7 +14,7 @@ namespace SocialMedia.Data.Repository
             _context = context;
         }
 
-        public async Task<IQueryable<PostReaction>> GetPostReactionAsync() { 
+        public IQueryable<PostReaction> GetPostReactionAsync() { 
             return _context.PostReactions.AsQueryable();
         }
         public async Task<PostReaction> GetReactionByID(Guid reactionId) {

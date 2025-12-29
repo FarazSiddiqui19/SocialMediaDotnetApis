@@ -9,11 +9,17 @@ namespace SocialMedia.models.DTO.Posts
 
         public required string Title { get; set; }
 
-        public JsonElement Body {  get; set; }
+        public JsonElement Body { get; set; }
 
         public int WordCount { get; set; }
+
+        public int Upvotes { get; set; }
+        public int Downvotes { get; set; }
+
+        public ReactionType? UserReaction { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
     }
 }
+

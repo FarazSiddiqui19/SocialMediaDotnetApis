@@ -1,5 +1,6 @@
 ﻿using SocialMedia.models;
 using SocialMedia.models.DTO.Posts;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace SocialMedia.mappers
@@ -21,7 +22,7 @@ namespace SocialMedia.mappers
             };
         }
 
-        public static VeiwPostsDTO Toveiw(this Posts post)
+        public static VeiwPostsDTO Toveiw(this Posts post, int Upvotes, int Downvotes)
         {
             var meta = post.Content.RootElement.GetProperty("meta");
             var body = post.Content.RootElement.GetProperty("body");
@@ -33,10 +34,14 @@ namespace SocialMedia.mappers
                 Title = post.Title,
                 WordCount = meta.GetProperty("wordCount").GetInt32(),
                 Body = body,
+                Upvotes = Upvotes,
+                Downvotes = Downvotes,
                 CreatedAt = post.CreatedAt
 
             };
         }
+
+
 
     }
 }
