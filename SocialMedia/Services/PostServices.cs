@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using SocialMedia.Data.Repository.Interfaces;
@@ -21,7 +21,10 @@ namespace SocialMedia.Services
 
         public PostServices(IPostRepository postRepository, 
                             IUserRepository userRepository, 
-                            IPostReactionRepository reactionRepository
+
+                            IPostReactionRepository reactionRepository,
+
+
                             IReactionSummaryService reactionSummaryService
             )
         {
