@@ -16,13 +16,19 @@ namespace SocialMedia.Services
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
         private readonly IPostReactionRepository _reactionRepository;
+        private readonly IReactionSummaryService _reactionSummaryService;
 
 
-        public PostServices(IPostRepository postRepository, IUserRepository userRepository, IPostReactionRepository reactionRepository)
+        public PostServices(IPostRepository postRepository, 
+                            IUserRepository userRepository, 
+                            IPostReactionRepository reactionRepository,
+                            IReactionSummaryService reactionSummaryService
+            )
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _reactionRepository = reactionRepository;
+            _reactionSummaryService = reactionSummaryService;
         }
 
 
@@ -31,11 +37,11 @@ namespace SocialMedia.Services
             var userExists = await _userRepository.GetUserByIdAsync(dto.UserId);
             var post = dto.ToPost();
             await _postRepository.AddPostAsync(post);
+            var reactionSummary = await _reactionSummaryService.PostAsync(post.PostId, null);
 
-            var upvotes = 0;
-            var downvotes = 0;
+           
 
-            return post.Toveiw(upvotes, downvotes);
+            return post.Toveiw(reactionSummary);
 
         }
 
@@ -83,27 +89,16 @@ namespace SocialMedia.Services
 
             var postIds = posts.Select(p => p.PostId).ToList();
 
-           
-            var reactionCounts = await _reactionRepository
-                .GetPostReactionAsync()
-                .Where(r => postIds.Contains(r.PostId))
-                .GroupBy(r => r.PostId)
-                .Select(g => new
-                {
-                    PostId = g.Key,
-                    Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
-                    Downvotes = g.Count(r => r.Type == ReactionType.Downvote)
-                })
-                .ToDictionaryAsync(x => x.PostId);
 
-            
+            var reaction = await _reactionSummaryService.AllPostsAsync(postIds, null);
+
+
             var result = posts.Select(p =>
             {
-                reactionCounts.TryGetValue(p.PostId, out var r);
-
+   
+                reaction.TryGetValue(p.PostId, out var summary);
                 return p.Toveiw(
-                    r?.Upvotes ?? 0,
-                    r?.Downvotes ?? 0
+                    summary
                 );
             }).ToList();
 
@@ -125,18 +120,7 @@ namespace SocialMedia.Services
         {
             var post = await _postRepository.GetPostByIdAsync(id);
 
-            var reactionSummary = await _reactionRepository
-                                        .GetPostReactionAsync()
-                                        .Where(r => r.PostId == id)
-                                        .GroupBy(r => r.PostId)
-                                        .Select(g => new
-        {
-            Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
-            Downvotes = g.Count(r => r.Type == ReactionType.Downvote)
-        })
-        .FirstOrDefaultAsync();
-
-
+            var reactionSummary = await _reactionSummaryService.PostAsync(id,null);
 
 
             if (post == null)
@@ -144,8 +128,7 @@ namespace SocialMedia.Services
                 return null;
             }
             return post.Toveiw(
-                    reactionSummary?.Upvotes ?? 0,
-                    reactionSummary?.Downvotes ?? 0
+                  reactionSummary
                 );
         }
 
@@ -159,25 +142,14 @@ namespace SocialMedia.Services
 
             var postIds = post.Select(p => p.PostId).ToList();
 
-            var reactionCounts = await _reactionRepository
-                .GetPostReactionAsync()
-                .Where(r => postIds.Contains(r.PostId))
-                .GroupBy(r => r.PostId)
-                .Select(g => new
-                {
-                    PostId = g.Key,
-                    Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
-                    Downvotes = g.Count(r => r.Type == ReactionType.Downvote)
-                })
-                .ToDictionaryAsync(x => x.PostId);
+            var reactionCounts = await _reactionSummaryService.AllPostsAsync(postIds, userId);
 
             return post.Select(p =>
             {
-                reactionCounts.TryGetValue(p.PostId, out var r);
+                reactionCounts.TryGetValue(p.PostId, out var summary);
 
                 return p.Toveiw(
-                    r?.Upvotes ?? 0,
-                    r?.Downvotes ?? 0
+                  summary
                 );
             }).ToList();
 
