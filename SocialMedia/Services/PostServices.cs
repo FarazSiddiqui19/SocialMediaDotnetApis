@@ -21,10 +21,7 @@ namespace SocialMedia.Services
 
         public PostServices(IPostRepository postRepository, 
                             IUserRepository userRepository, 
-
                             IPostReactionRepository reactionRepository,
-
-
                             IReactionSummaryService reactionSummaryService
             )
         {
