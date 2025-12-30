@@ -15,21 +15,18 @@ namespace SocialMedia.Services
     {
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IPostReactionRepository _reactionRepository;
         private readonly IReactionSummaryService _reactionSummaryService;
         private readonly IPostQueryBuilder _postQueryBuilder;
 
 
         public PostServices(IPostRepository postRepository, 
                             IUserRepository userRepository, 
-                            IPostReactionRepository reactionRepository,
                             IReactionSummaryService reactionSummaryService,
                             IPostQueryBuilder postQueryBuilder
             )
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
-            _reactionRepository = reactionRepository;
             _reactionSummaryService = reactionSummaryService;
             _postQueryBuilder = postQueryBuilder;
         }
@@ -74,7 +71,8 @@ namespace SocialMedia.Services
 
             List<Guid> postIds = posts.Select(p => p.PostId).ToList();
 
-            var reactionSummary = await _reactionSummaryService.AllPostsAsync(postIds, UserId);
+            Dictionary<Guid, ReactionSummaryDTO> reactionSummary = await _reactionSummaryService.AllPostsAsync(postIds, UserId);
+
 
             List<VeiwPostsDTO> veiwPostsDTOs = posts.Select(p =>
             {
@@ -114,7 +112,7 @@ namespace SocialMedia.Services
                 );
         }
 
-        public async Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
+        public async Task<PagedResults<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
         {
 
             var post = await _postRepository
@@ -122,18 +120,40 @@ namespace SocialMedia.Services
                                 .Where(p => p.UserId == userId)
                                 .ToListAsync();
 
-            var postIds = post.Select(p => p.PostId).ToList();
-
-            var reactionCounts = await _reactionSummaryService.AllPostsAsync(postIds, userId);
-
-            return post.Select(p =>
+            int totalCount = post.Count;
+            PostQueryParams queryParams = new PostQueryParams
             {
-                reactionCounts.TryGetValue(p.PostId, out var summary);
+                PostsByUser = userId,
+                Page = 1,
+                PageSize = post.Count
+            };
+            IQueryable<Posts> query = _postQueryBuilder.Build(queryParams);
 
+            List<Posts> posts = await query
+                                        .Skip((queryParams.Page - 1) * queryParams.PageSize)
+                                        .Take(queryParams.PageSize)
+                                        .ToListAsync();
+                              
+
+            var postIds = posts.Select(p => p.PostId).ToList();
+
+            var reactionSummary = await _reactionSummaryService.AllPostsAsync(postIds, userId);
+
+            List<VeiwPostsDTO> veiwPostsDTOs = posts.Select(p =>
+            {
+                reactionSummary.TryGetValue(p.PostId, out var summary);
                 return p.Toveiw(
                   summary
                 );
             }).ToList();
+
+            return new PagedResults<VeiwPostsDTO>
+            {
+                Items = veiwPostsDTOs,
+                TotalCount = totalCount,
+                Page = queryParams.Page,
+                PageSize = queryParams.PageSize
+            };
 
 
         }
