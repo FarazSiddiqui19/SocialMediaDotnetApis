@@ -127,33 +127,10 @@ namespace SocialMedia.Services
                 Page = 1,
                 PageSize = post.Count
             };
-            IQueryable<Posts> query = _postQueryBuilder.Build(queryParams);
 
-            List<Posts> posts = await query
-                                        .Skip((queryParams.Page - 1) * queryParams.PageSize)
-                                        .Take(queryParams.PageSize)
-                                        .ToListAsync();
-                              
+            return await GetAllPostsAsync( queryParams, userId);
 
-            var postIds = posts.Select(p => p.PostId).ToList();
-
-            var reactionSummary = await _reactionSummaryService.AllPostsAsync(postIds, userId);
-
-            List<VeiwPostsDTO> veiwPostsDTOs = posts.Select(p =>
-            {
-                reactionSummary.TryGetValue(p.PostId, out var summary);
-                return p.Toveiw(
-                  summary
-                );
-            }).ToList();
-
-            return new PagedResults<VeiwPostsDTO>
-            {
-                Items = veiwPostsDTOs,
-                TotalCount = totalCount,
-                Page = queryParams.Page,
-                PageSize = queryParams.PageSize
-            };
+           
 
 
         }
