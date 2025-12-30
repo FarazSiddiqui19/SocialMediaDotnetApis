@@ -4,7 +4,7 @@ namespace SocialMedia.models.DTO
 {
     public class PostQueryParams
     {
-        public Guid? UserId { get; set; }
+        public Guid? PostsByUser { get; set; }
 
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }

@@ -31,8 +31,8 @@ namespace SocialMedia.Services
         private static IQueryable<Posts> ApplyUserFilter(
             IQueryable<Posts> query, PostQueryParams p)
         {
-            if (p.UserId.HasValue)
-                query = query.Where(x => x.UserId == p.UserId);
+            if (p.PostsByUser.HasValue)
+                query = query.Where(x => x.UserId == p.PostsByUser);
 
             return query;
         }
