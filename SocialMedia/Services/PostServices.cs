@@ -60,59 +60,38 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(posts);
         }
 
-        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(
-                                                                    string? title,
-                                                                    int page,
-                                                                    int pageSize,
-                                                                    SortingOrder order)
+        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(PostQueryParams queryParams,Guid? UserId)
         {
           
-            var postsQuery = _postRepository.PostQuery();
+            IQueryable<Posts> query = _postQueryBuilder.Build(queryParams);
 
-            
-            if (!string.IsNullOrWhiteSpace(title))
+            int totalCount = await query.CountAsync();
+
+            List<Posts> posts = await query
+                                                .Skip((queryParams.Page - 1) * queryParams.PageSize)
+                                                .Take(queryParams.PageSize)
+                                                .ToListAsync();
+
+            List<Guid> postIds = posts.Select(p => p.PostId).ToList();
+
+            var reactionSummary = await _reactionSummaryService.AllPostsAsync(postIds, UserId);
+
+            List<VeiwPostsDTO> veiwPostsDTOs = posts.Select(p =>
             {
-                postsQuery = postsQuery
-                    .Where(p => p.Title.ToLower().Contains(title.ToLower()));
-            }
-
-           
-            postsQuery = order == SortingOrder.Asc
-                ? postsQuery.OrderBy(p => p.CreatedAt)
-                : postsQuery.OrderByDescending(p => p.CreatedAt);
-
-            
-            var totalCount = await postsQuery.CountAsync();
-
-           
-            var posts =await  postsQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var postIds = posts.Select(p => p.PostId).ToList();
-
-
-            var reaction = await _reactionSummaryService.AllPostsAsync(postIds, null);
-
-
-            var result = posts.Select(p =>
-            {
-   
-                reaction.TryGetValue(p.PostId, out var summary);
+                reactionSummary.TryGetValue(p.PostId, out var summary);
                 return p.Toveiw(
-                    summary
+                  summary
                 );
             }).ToList();
 
-           
             return new PagedResults<VeiwPostsDTO>
             {
-                Items = result,
+                Items = veiwPostsDTOs,
                 TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
+                Page = queryParams.Page,
+                PageSize = queryParams.PageSize
             };
+
         }
 
 

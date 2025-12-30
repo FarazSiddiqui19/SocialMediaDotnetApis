@@ -17,9 +17,9 @@ namespace SocialMedia.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<VeiwPostsDTO>> Get([FromQuery] string? Title, int page = 2, int pagesize = 1, SortingOrder order = SortingOrder.Asc)
+        public async Task<ActionResult<VeiwPostsDTO>> Get([FromQuery]PostQueryParams queryParams,Guid? UserId)
         {
-            var postList = await _postService.GetAllPostsAsync(Title, page, pagesize, order);
+            var postList = await _postService.GetAllPostsAsync(queryParams,UserId);
             return Ok(postList);
         }
 

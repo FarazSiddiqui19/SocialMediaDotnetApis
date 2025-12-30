@@ -7,7 +7,7 @@ namespace SocialMedia.Services.Interfaces
     {
         Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto);
 
-        Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize, SortingOrder order);
+        Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(PostQueryParams queryParams,Guid? UserId);
         Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId);
 
 

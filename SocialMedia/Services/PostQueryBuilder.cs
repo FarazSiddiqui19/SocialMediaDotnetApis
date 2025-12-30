@@ -42,7 +42,7 @@ namespace SocialMedia.Services
         {
             if (!string.IsNullOrWhiteSpace(p.Search))
                 query = query.Where(x =>
-                    x.Title.Contains(p.Search));
+                    x.Title.ToLower().Contains(p.Search.ToLower()));
 
             return query;
         }
@@ -51,10 +51,20 @@ namespace SocialMedia.Services
             IQueryable<Posts> query, PostQueryParams p)
         {
             if (p.FromDate.HasValue)
-                query = query.Where(x => x.CreatedAt >= p.FromDate);
+            {
+                var fromUtc = DateTime.SpecifyKind(
+                    p.FromDate.Value, DateTimeKind.Utc);
+
+                query = query.Where(x => x.CreatedAt >= fromUtc);
+            }
 
             if (p.ToDate.HasValue)
-                query = query.Where(x => x.CreatedAt <= p.ToDate);
+            {
+                var toUtc = DateTime.SpecifyKind(
+                    p.ToDate.Value, DateTimeKind.Utc);
+
+                query = query.Where(x => x.CreatedAt <= toUtc);
+            }
 
             return query;
         }
