@@ -22,6 +22,7 @@ namespace SocialMedia.Services
         public async Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto)
         {
             var user = dto.ToUser();
+
             await _userRepository.AddUserAsync(user);
             return user.Toveiw();
 
@@ -68,6 +69,17 @@ namespace SocialMedia.Services
                 .Select(u=>u.Toveiw())
                 .ToListAsync();
 
+            if(result.Count == 0)
+            {
+                return new PagedResults<VeiwUsersDTO>
+                {
+                    Items = new List<VeiwUsersDTO>(),
+                    TotalCount = 0,
+                    Page = page,
+                    PageSize = pageSize
+                };
+            }
+
 
 
             return new PagedResults<VeiwUsersDTO>
@@ -97,7 +109,25 @@ namespace SocialMedia.Services
                 return false;
             }
             existingUser.Username = dto.Username;
+
+            try
+            {
+                await _userRepository.UpdateUserAsync(existingUser);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (await _userRepository.GetUserByIdAsync(id) == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             await _userRepository.UpdateUserAsync(existingUser);
+
             return true;
         }
 

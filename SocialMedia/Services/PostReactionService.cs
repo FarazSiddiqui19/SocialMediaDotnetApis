@@ -1,26 +1,28 @@
 ﻿using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.models;
 using SocialMedia.models.DTO.PostReaction;
+using SocialMedia.Services.Interfaces;
 
-namespace SocialMedia.Services.Interfaces
+namespace SocialMedia.Services
 {
     public class PostReactionService : IPostReactionService
     {
         private readonly IPostReactionRepository _reactionRepo;
-        private readonly IPostRepository _postRepo;
+        private readonly IPostsServices _postServices;
 
         public PostReactionService(
             IPostReactionRepository reactionRepo,
-            IPostRepository postRepo)
+            IPostsServices postServices)
         {
             _reactionRepo = reactionRepo;
-            _postRepo = postRepo;
+            _postServices = postServices;
         }
 
         public async Task ToggleReactionAsync(ReactToPostDTO dto)
         {
           
-            var post = await _postRepo.GetPostByIdAsync(dto.PostId);
+            var post = await _postServices.GetPostByIdAsync(dto.PostId);
+            
             if (post == null)
                 throw new ArgumentException("Post not found");
 

@@ -6,6 +6,7 @@ using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO;
 using SocialMedia.models.DTO.Posts;
+using SocialMedia.models.DTO.Users;
 using SocialMedia.Services.Interfaces;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -14,19 +15,19 @@ namespace SocialMedia.Services
     public class PostServices : IPostsServices
     {
         private readonly IPostRepository _postRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IUsersServices _usersServices;
         private readonly IReactionSummaryService _reactionSummaryService;
         private readonly IPostQueryBuilder _postQueryBuilder;
 
 
         public PostServices(IPostRepository postRepository, 
-                            IUserRepository userRepository, 
                             IReactionSummaryService reactionSummaryService,
+                            IUsersServices usersServices,
                             IPostQueryBuilder postQueryBuilder
             )
         {
             _postRepository = postRepository;
-            _userRepository = userRepository;
+            _usersServices = usersServices;
             _reactionSummaryService = reactionSummaryService;
             _postQueryBuilder = postQueryBuilder;
         }
@@ -34,12 +35,17 @@ namespace SocialMedia.Services
 
         public async Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto)
         {
-            var userExists = await _userRepository.GetUserByIdAsync(dto.UserId);
-            var post = dto.ToPost();
-            await _postRepository.AddPostAsync(post);
-            var reactionSummary = await _reactionSummaryService.PostAsync(post.PostId, null);
+           VeiwUsersDTO? users = await _usersServices.GetUserByIdAsync(dto.UserId);
 
-           
+
+            if (users == null)
+            { 
+                throw new Exception("User does not exist");
+            }
+
+            Posts? post = dto.ToPost();
+            await _postRepository.AddPostAsync(post);
+            ReactionSummaryDTO? reactionSummary = await _reactionSummaryService.PostAsync(post.PostId, null);
 
             return post.Toveiw(reactionSummary);
 
@@ -47,7 +53,7 @@ namespace SocialMedia.Services
 
         public async Task<bool> DeletePostAsync(Guid id)
         {
-            var posts = await _postRepository.GetPostByIdAsync(id);
+            Posts? posts = await _postRepository.GetPostByIdAsync(id);
 
             if (posts == null)
             {
@@ -98,9 +104,9 @@ namespace SocialMedia.Services
 
         public async Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id)
         {
-            var post = await _postRepository.GetPostByIdAsync(id);
+            Posts? post = await _postRepository.GetPostByIdAsync(id);
 
-            var reactionSummary = await _reactionSummaryService.PostAsync(id,null);
+            ReactionSummaryDTO? reactionSummary = await _reactionSummaryService.PostAsync(id,null);
 
 
             if (post == null)
@@ -115,7 +121,7 @@ namespace SocialMedia.Services
         public async Task<PagedResults<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
         {
 
-            var post = await _postRepository
+            List<Posts>? post = await _postRepository
                                 .PostQuery()
                                 .Where(p => p.UserId == userId)
                                 .ToListAsync();
@@ -137,7 +143,7 @@ namespace SocialMedia.Services
 
         public async Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto)
         {
-            var existingPost = await _postRepository.GetPostByIdAsync(id);
+            Posts? existingPost = await _postRepository.GetPostByIdAsync(id);
             if (existingPost == null)
             {
                 return false;
