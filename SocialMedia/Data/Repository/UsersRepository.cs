@@ -2,6 +2,7 @@
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.models;
 using SocialMedia.Data;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace SocialMedia.Data.Repository
 {
@@ -31,12 +32,43 @@ namespace SocialMedia.Data.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Users>?> GetUserByNameAsync(string name,int pagesize, int page) 
+        public async Task<List<Users>?> GetAllUsersAsync(int pagesize, int page, SortOrder order) 
+        {
+            if(order == SortOrder.Descending)
+            {
+                return await _Users
+                .OrderByDescending(u => u.Username)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
+                .ToListAsync();
+            }
+
+            return await _Users
+                .OrderBy(u => u.Username)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
+                .ToListAsync();
+        }
+
+        public async Task<List<Users>?> GetUserByNameAsync(string name,int pagesize, int page,SortOrder order) 
         {
 
-            return await _QueryUsers
-                .Where(u => u.Username!.ToLower().Contains(name.ToLower()))
-                .Skip(pagesize * (page - 1))
+            if (order == SortOrder.Descending)
+            {
+                return await _Users
+                 .Where(u => u.Username.ToLower().Contains(name.ToLower()))
+                 .OrderByDescending(u => u.Username)
+                 .Skip((page - 1) * pagesize)
+                 .Take(pagesize)
+                 .ToListAsync();
+            }
+
+          
+
+            return await _Users
+                .Where(u => u.Username.ToLower().Contains(name.ToLower()))
+                .OrderBy(u => u.Username)
+                .Skip((page - 1) * pagesize)
                 .Take(pagesize)
                 .ToListAsync();
 

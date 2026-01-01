@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
@@ -42,53 +43,41 @@ namespace SocialMedia.Services
             return true;
         }
 
-        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize, SortingOrder ord)
+        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize, SortOrder ord)
         {
-            var users = _userRepository.UserQuery();
-
-            if (!string.IsNullOrEmpty(Username))
-            {
-                users = users.Where(u => u.Username.ToLower().Contains(Username.ToLower()));
+            List<Users>? users;
+            int totalCount = 0;
+            if (string.IsNullOrEmpty(Username)) {
+                users = await _userRepository.GetAllUsersAsync(pageSize, page, ord);
 
             }
 
-            if(ord == SortingOrder.Desc)
-            {
-                users = users.OrderByDescending(u => u.Username);
-            }
             else
             {
-                users = users.OrderBy(u => u.Username);
+                users = await _userRepository.GetUserByNameAsync(Username!, pageSize, page, ord);
             }
 
-            var totalCount = await users.CountAsync();
 
-            var result = await users
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(u=>u.Toveiw())
-                .ToListAsync();
-
-            if(result.Count == 0)
+            if (users!.Count == 0 || users == null)
             {
+                totalCount = 0;
+
+            }
+
+            else { 
+                totalCount = users.Count;
+            }
+
+             
+            var veiwUsers = users!.Select(u => u.Toveiw()).ToList();
                 return new PagedResults<VeiwUsersDTO>
                 {
-                    Items = new List<VeiwUsersDTO>(),
-                    TotalCount = 0,
+                    Items = veiwUsers,
+                    TotalCount = totalCount,
                     Page = page,
                     PageSize = pageSize
                 };
-            }
-
-
-
-            return new PagedResults<VeiwUsersDTO>
-            {
-                Items = result,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
+          
         }
 
         public async Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id)
