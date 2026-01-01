@@ -31,6 +31,18 @@ namespace SocialMedia.Data.Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<Users>?> GetUserByNameAsync(string name,int pagesize, int page) 
+        {
+
+            return await _QueryUsers
+                .Where(u => u.Username!.ToLower().Contains(name.ToLower()))
+                .Skip(pagesize * (page - 1))
+                .Take(pagesize)
+                .ToListAsync();
+
+        }
+
+
         public async Task<bool> UpdateUserAsync(Users user) 
         { 
             _Users.Update(user);
