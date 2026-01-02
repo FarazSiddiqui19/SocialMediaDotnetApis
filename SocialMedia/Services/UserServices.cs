@@ -74,8 +74,7 @@ namespace SocialMedia.Services
                 {
                     Items = veiwUsers,
                     TotalCount = totalCount,
-                    Page = page,
-                    PageSize = pageSize
+
                 };
           
         }

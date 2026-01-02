@@ -5,6 +5,6 @@
         public Guid PostId { get; set; }
         public int Upvotes { get; set; }
         public int Downvotes { get; set; }
-        public ReactionType? UserReaction { get; set; }
+      
     }
 }

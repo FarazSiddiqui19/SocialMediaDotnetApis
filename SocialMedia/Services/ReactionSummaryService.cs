@@ -35,7 +35,7 @@ namespace SocialMedia.Services
                     PostId = g.Key,
                     Upvotes = g.Count(r => r.Type == ReactionType.Upvote),
                     Downvotes = g.Count(r => r.Type == ReactionType.Downvote),
-                    UserReaction = null
+                 
                 })
                 .ToDictionaryAsync(x => x.PostId);
 
@@ -51,7 +51,7 @@ namespace SocialMedia.Services
                 {
                     if (summaries.TryGetValue(ur.PostId, out var summary))
                     {
-                        summary.UserReaction = ur.Type;
+                        
                     }
                 }
             }
@@ -75,7 +75,7 @@ namespace SocialMedia.Services
                     PostId = postId,
                     Upvotes = 0,
                     Downvotes = 0,
-                    UserReaction = null
+               
                 };
         }
     }

@@ -18,8 +18,11 @@ namespace SocialMedia.models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public List<PostReaction>? Reactions { get; set; }
+
+        public virtual Users? User { get; set; }
 
 
 
-    }
+        }
 }

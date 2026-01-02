@@ -15,30 +15,32 @@ namespace SocialMedia.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Posts>()
-                .HasOne<Users>()
-                .WithMany()
+            modelBuilder.Entity<Posts>(entity =>
+            {
+                entity.HasOne(p => p.User).WithMany(a => a.Posts)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<PostReaction>(entity =>
             {
                 entity.HasKey(r => r.Id);
 
-               
+
                 entity.HasIndex(r => new { r.PostId, r.UserId })
                       .IsUnique();
 
-                entity.HasOne<Posts>()
-                      .WithMany()
-                      .HasForeignKey(r => r.PostId)
-                      .OnDelete(DeleteBehavior.Cascade);
 
-               
+              entity.HasOne<Posts>()
+                  .WithMany(p => p.Reactions)
+                  .HasForeignKey(r => r.PostId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+
                 entity.HasOne<Users>()
-                      .WithMany()
-                      .HasForeignKey(r => r.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany()
+                  .HasForeignKey(r => r.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
             });
 
 

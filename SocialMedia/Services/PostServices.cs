@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
@@ -40,14 +42,14 @@ namespace SocialMedia.Services
 
             if (users == null)
             { 
-                throw new Exception("User does not exist");
+                throw new Exception("User not found");
             }
 
             Posts? post = dto.ToPost();
             await _postRepository.AddPostAsync(post);
             ReactionSummaryDTO? reactionSummary = await _reactionSummaryService.PostAsync(post.PostId, null);
 
-            return post.Toveiw(reactionSummary);
+            return post.Toveiw();
 
         }
 
@@ -63,38 +65,32 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(posts);
         }
 
-        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(PostQueryParams queryParams,Guid? UserId)
+        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(PostsFilterDTO filters,
+                                                                        Guid? UserId)
         {
+            List<Posts>? postlist;
+            postlist= await _postRepository.GetAllPostsFiltered(filters);
+
+            if (postlist == null) { 
+                
+            
+            }
+
+            int totalCount = postlist.Count;
           
-            IQueryable<Posts> query = _postQueryBuilder.Build(queryParams);
 
-            int totalCount = await query.CountAsync();
-
-            List<Posts> posts = await query
-                                                .Skip((queryParams.Page - 1) * queryParams.PageSize)
-                                                .Take(queryParams.PageSize)
-                                                .ToListAsync();
-
-            List<Guid> postIds = posts.Select(p => p.PostId).ToList();
-
-            Dictionary<Guid, ReactionSummaryDTO> reactionSummary = await _reactionSummaryService.AllPostsAsync(postIds, UserId);
-
-
-            List<VeiwPostsDTO> veiwPostsDTOs = posts.Select(p =>
+            List<VeiwPostsDTO> veiwPostsDTOs = postlist.Select(p =>
             {
-                reactionSummary.TryGetValue(p.PostId, out var summary);
-                return p.Toveiw(
-                  summary
-                );
+                return p.Toveiw();
             }).ToList();
 
             return new PagedResults<VeiwPostsDTO>
             {
                 Items = veiwPostsDTOs,
                 TotalCount = totalCount,
-                Page = queryParams.Page,
-                PageSize = queryParams.PageSize
             };
+
+            
 
         }
 
@@ -106,37 +102,41 @@ namespace SocialMedia.Services
         {
             Posts? post = await _postRepository.GetPostByIdAsync(id);
 
-            ReactionSummaryDTO? reactionSummary = await _reactionSummaryService.PostAsync(id,null);
+            List<PostReaction>? reactions = post.Reactions;
 
-
+          
             if (post == null)
             {
                 return null;
             }
-            return post.Toveiw(
-                  reactionSummary
-                );
+            return post.Toveiw();
         }
 
-        public async Task<PagedResults<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
+        public async Task<PagedResults<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid? UserId,PostsFilterDTO filter)
         {
 
-            List<Posts>? post = await _postRepository
-                                .PostQuery()
-                                .Where(p => p.UserId == userId)
-                                .ToListAsync();
+            List<Posts>? post = await _postRepository.GetAllPostsFiltered(filter);
+
+            if (post == null) { 
+            }
 
             int totalCount = post.Count;
-            PostQueryParams queryParams = new PostQueryParams
+
+
+            List<VeiwPostsDTO> veiwPostsDTOs = post.Select(p =>
             {
-                PostsByUser = userId,
-                Page = 1,
-                PageSize = post.Count
+    
+                return p.Toveiw();
+            }).ToList();
+
+
+            return new PagedResults<VeiwPostsDTO>
+            {
+                Items = veiwPostsDTOs,
+                TotalCount = totalCount,
             };
 
-            return await GetAllPostsAsync( queryParams, userId);
 
-           
 
 
         }

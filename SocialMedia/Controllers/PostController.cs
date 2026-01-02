@@ -16,10 +16,10 @@ namespace SocialMedia.Controllers
             _postService = postServices;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<VeiwPostsDTO>> Get([FromQuery]PostQueryParams queryParams,Guid? UserId)
+        [HttpPost("/getAllPosts")]
+        public async Task<ActionResult<VeiwPostsDTO>> Get([FromBody]PostsFilterDTO filters,Guid? UserId)
         {
-            var postList = await _postService.GetAllPostsAsync(queryParams,UserId);
+            var postList = await _postService.GetAllPostsAsync(filters, UserId);
             return Ok(postList);
         }
 

@@ -48,7 +48,7 @@ namespace SocialMedia.Migrations
                     b.HasIndex("PostId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("PostReactions");
+                    b.ToTable("PostReactions", (string)null);
                 });
 
             modelBuilder.Entity("SocialMedia.models.Posts", b =>
@@ -75,7 +75,7 @@ namespace SocialMedia.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("SocialMedia.models.Users", b =>
@@ -90,7 +90,7 @@ namespace SocialMedia.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("SocialMedia.models.PostReaction", b =>
