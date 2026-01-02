@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using SocialMedia.Data;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.models;
-using SocialMedia.Data;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using System.Linq.Expressions;
 
 namespace SocialMedia.Data.Repository
 {
@@ -52,6 +53,8 @@ namespace SocialMedia.Data.Repository
 
         public async Task<List<Users>?> GetUserByNameAsync(string name,int pagesize, int page,SortOrder order) 
         {
+
+           
 
             if (order == SortOrder.Descending)
             {

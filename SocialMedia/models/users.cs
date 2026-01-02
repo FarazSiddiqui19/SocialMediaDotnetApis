@@ -8,7 +8,7 @@ namespace SocialMedia.models
 
         public required string Username { get; set; }
 
-        public virtual List<Posts> Posts { get; set; }
+        public virtual List<Posts>? Posts { get; set; }
 
     }
 }

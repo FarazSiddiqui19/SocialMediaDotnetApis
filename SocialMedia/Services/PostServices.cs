@@ -18,17 +18,15 @@ namespace SocialMedia.Services
     {
         private readonly IPostRepository _postRepository;
         private readonly IUsersServices _usersServices;
-        private readonly IPostQueryBuilder _postQueryBuilder;
+       
 
 
         public PostServices(IPostRepository postRepository, 
-                            IUsersServices usersServices,
-                            IPostQueryBuilder postQueryBuilder
+                            IUsersServices usersServices
             )
         {
             _postRepository = postRepository;
             _usersServices = usersServices;
-            _postQueryBuilder = postQueryBuilder;
         }
 
 
