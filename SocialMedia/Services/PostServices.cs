@@ -18,19 +18,16 @@ namespace SocialMedia.Services
     {
         private readonly IPostRepository _postRepository;
         private readonly IUsersServices _usersServices;
-        private readonly IReactionSummaryService _reactionSummaryService;
         private readonly IPostQueryBuilder _postQueryBuilder;
 
 
         public PostServices(IPostRepository postRepository, 
-                            IReactionSummaryService reactionSummaryService,
                             IUsersServices usersServices,
                             IPostQueryBuilder postQueryBuilder
             )
         {
             _postRepository = postRepository;
             _usersServices = usersServices;
-            _reactionSummaryService = reactionSummaryService;
             _postQueryBuilder = postQueryBuilder;
         }
 
@@ -47,7 +44,7 @@ namespace SocialMedia.Services
 
             Posts? post = dto.ToPost();
             await _postRepository.AddPostAsync(post);
-            ReactionSummaryDTO? reactionSummary = await _reactionSummaryService.PostAsync(post.PostId, null);
+         
 
             return post.Toveiw();
 
