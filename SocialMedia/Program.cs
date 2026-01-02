@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUsersServices, UserServices>();
 builder.Services.AddScoped<IPostsServices, PostServices>();
 builder.Services.AddScoped<IPostReactionService, PostReactionService>();
-builder.Services.AddScoped<IPostQueryBuilder, PostQueryBuilder>();
+
 
 builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
