@@ -17,7 +17,7 @@ namespace SocialMedia.mappers
                 UserId = dto.UserId,
                 PostId = Guid.NewGuid(),
                 Title = dto.Title,
-                Content = PostContentBuilder.Build(dto.Body),
+                Content = dto.Content ,
                 CreatedAt = DateTime.UtcNow
 
             };
@@ -25,8 +25,7 @@ namespace SocialMedia.mappers
 
         public static VeiwPostsDTO Toveiw(this Posts post)
         {
-            var meta = post.Content.RootElement.GetProperty("meta");
-            var body = post.Content.RootElement.GetProperty("body");
+           
             var upvotes = post.Reactions?.Count(r => r.Type == ReactionType.Upvote) ?? 0;
             var downvotes = post.Reactions?.Count(r => r.Type == ReactionType.Downvote) ?? 0;
            
@@ -38,8 +37,8 @@ namespace SocialMedia.mappers
                 UserId = post.UserId,
                 PostId = post.PostId,
                 Title = post.Title,
-                WordCount = meta.GetProperty("wordCount").GetInt32(),
-                Body = body,
+                WordCount = post.Content.meta.wordCount,
+                Body = post.Content.markdown.content,
                 Upvotes = upvotes,
                 Downvotes = downvotes,
                 CreatedAt = post.CreatedAt

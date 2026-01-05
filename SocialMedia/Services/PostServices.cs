@@ -113,6 +113,7 @@ namespace SocialMedia.Services
             List<Posts>? post = await _postRepository.GetAllPostsFiltered(filter);
 
             if (post == null) { 
+                //
             }
 
             int totalCount = post.Count;
@@ -145,7 +146,7 @@ namespace SocialMedia.Services
             }
 
             existingPost.Title = dto.Title;
-            existingPost.Content = PostContentBuilder.Build(dto.Body);
+            existingPost.Content = dto.Content;
             return await _postRepository.UpdatePostAsync(existingPost);
         }
 

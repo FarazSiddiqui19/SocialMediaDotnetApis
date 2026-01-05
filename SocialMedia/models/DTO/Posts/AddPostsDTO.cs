@@ -7,6 +7,6 @@ namespace SocialMedia.models.DTO.Posts
         public Guid UserId { get; set; }
         public required string Title { get; set; }
 
-        public JsonElement Body {  get; set; }
+        public PostContent Content {  get; set; }
     }
 }

@@ -53,19 +53,26 @@ namespace SocialMedia.Data.Repository
             int pagesize = filter.pagesize;
 
 
-            query = (sortby, orderby) switch
+           
+
+            switch(sortby, orderby)
             {
-                (SortByParam.CreatedAt, SortOrder.Ascending)
-                    => query.OrderBy(p => p.CreatedAt),
-
-                (SortByParam.CreatedAt, SortOrder.Descending)
-                    => query.OrderByDescending(p => p.CreatedAt),
-
-                (SortByParam.Title, SortOrder.Ascending)
-                    => query.OrderBy(p => p.Title),
-
-                _ => query.OrderByDescending(p => p.Title)
-            };
+                case (SortByParam.CreatedAt, SortOrder.Ascending):
+                    query = query.OrderBy(p => p.CreatedAt);
+                    break;
+                case (SortByParam.CreatedAt, SortOrder.Descending):
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                    break;
+                case (SortByParam.Title, SortOrder.Ascending):
+                    query = query.OrderBy(p => p.Title);
+                    break;
+                case (SortByParam.Title, SortOrder.Descending):
+                    query = query.OrderByDescending(p => p.Title);
+                    break;
+                default:
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                    break;
+            }
 
           
             return await query
@@ -79,7 +86,7 @@ namespace SocialMedia.Data.Repository
         {
             IQueryable<Posts> query = _Posts
                                         .Include(p => p.Reactions);
-            Guid? UserId = filter.UserId ;
+            Guid? UserId = filter.UserId;
             DateTime? fromDate = filter.FromDate;
             DateTime? toDate = filter.ToDate;
             string? title = filter.Title;
@@ -109,21 +116,30 @@ namespace SocialMedia.Data.Repository
                 query = query.Where(p => p.Title.Contains(title));
             }
 
-         
 
-            query = (sortby, orderby) switch
-            {
-                (SortByParam.CreatedAt, SortOrder.Ascending)
-                    => query.OrderBy(p => p.CreatedAt),
 
-                (SortByParam.CreatedAt, SortOrder.Descending)
-                    => query.OrderByDescending(p => p.CreatedAt),
 
-                (SortByParam.Title, SortOrder.Ascending)
-                    => query.OrderBy(p => p.Title),
+            switch (sortby,orderby) {
+                case (SortByParam.CreatedAt,SortOrder.Ascending):
+                    query = query.OrderBy(p=>p.CreatedAt); 
+                    break;
 
-                _ => query.OrderByDescending(p => p.Title)
-            };
+                case (SortByParam.CreatedAt,SortOrder.Descending):
+                    query = query.OrderBy(p => p.CreatedAt);
+                    break;  
+                    
+                case (SortByParam.Title,SortOrder.Ascending):
+                    query = query.OrderBy(p => p.Title);
+                    break;
+
+                case (SortByParam.Title,SortOrder.Descending):
+                    query = query.OrderByDescending(p => p.Title);
+                    break;
+
+                default:
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                    break;
+            }
 
            
 

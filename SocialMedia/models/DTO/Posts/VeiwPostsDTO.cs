@@ -9,7 +9,7 @@ namespace SocialMedia.models.DTO.Posts
 
         public required string Title { get; set; }
 
-        public JsonElement Body { get; set; }
+        public string Body { get; set; }
 
         public int WordCount { get; set; }
 
