@@ -6,16 +6,12 @@ namespace SocialMedia.Data.Repository.Interfaces
 {
     public interface IPostRepository
     {
+   
+        Task<Post?> GetPostByIdAsync(Guid postId);
+        Task<PagedResults<PostResponse>> GetAllPosts(PostsFilterDTO filter);
+        Task AddPostAsync(Post post);
+        Task<bool> UpdatePostAsync(Post posts);
+        Task<bool> DeletePostAsync(Post post);
        
-       
-        Task<Posts?> GetPostByIdAsync(Guid postId);
-
-        Task<List<Posts>?> GetAllPosts(PostsFilterDTO filter);
-
-        Task<List<Posts>?> GetAllPostsFiltered(PostsFilterDTO filter);
-        Task AddPostAsync(Posts post);
-        Task<bool> UpdatePostAsync(Posts posts);
-        Task<bool> DeletePostAsync(Posts post);
-        IQueryable<Posts> PostQuery();
     }
 }

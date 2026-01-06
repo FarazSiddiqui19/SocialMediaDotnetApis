@@ -9,36 +9,34 @@ namespace SocialMedia.mappers
     public static class PostMapper
     {
 
-        public static Posts ToPost(this AddPostsDTO dto)
+        public static Post ToEntity(this AddPostsDTO dto)
         {
 
-            return new Posts
+            return new Post
             {
                 UserId = dto.UserId,
-                PostId = Guid.NewGuid(),
                 Title = dto.Title,
-                Content = dto.Content ,
-                CreatedAt = DateTime.UtcNow
+                Content = dto.Content 
 
             };
         }
 
-        public static VeiwPostsDTO Toveiw(this Posts post)
+        public static PostResponse ToDTO(this Post post)
         {
            
-            var upvotes = post.Reactions?.Count(r => r.Type == ReactionType.Upvote) ?? 0;
-            var downvotes = post.Reactions?.Count(r => r.Type == ReactionType.Downvote) ?? 0;
+            int upvotes = post.Reactions?.Count(r => r.Type == ReactionType.Upvote) ?? 0;
+            int downvotes = post.Reactions?.Count(r => r.Type == ReactionType.Downvote) ?? 0;
            
 
 
 
-            return new VeiwPostsDTO
+            return new PostResponse
             {
                 UserId = post.UserId,
-                PostId = post.PostId,
+                Id = post.Id,
                 Title = post.Title,
                 WordCount = post.Content.meta.wordCount,
-                Body = post.Content.markdown.content,
+                Content = post.Content.markdown.content,
                 Upvotes = upvotes,
                 Downvotes = downvotes,
                 CreatedAt = post.CreatedAt

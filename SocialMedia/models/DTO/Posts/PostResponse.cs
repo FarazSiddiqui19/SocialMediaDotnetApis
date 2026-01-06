@@ -2,14 +2,14 @@
 
 namespace SocialMedia.models.DTO.Posts
 {
-    public class VeiwPostsDTO
+    public class PostResponse
     {
-        public Guid PostId { get; set; }
+        public Guid Id { get; set; }
         public Guid UserId { get; set; }
 
         public required string Title { get; set; }
 
-        public string Body { get; set; }
+        public string Content { get; set; }
 
         public int WordCount { get; set; }
 

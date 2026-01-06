@@ -22,10 +22,10 @@ namespace SocialMedia.Services
        
         public async Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto)
         {
-            var user = dto.ToUser();
+            var user = dto.ToEntity();
 
             await _userRepository.AddUserAsync(user);
-            return user.Toveiw();
+            return user.ToDTO();
 
         }
 
@@ -45,7 +45,7 @@ namespace SocialMedia.Services
 
         public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize, SortOrder ord)
         {
-            List<Users>? users;
+            List<User>? users;
             int totalCount = 0;
             if (string.IsNullOrEmpty(Username)) {
                 users = await _userRepository.GetAllUsersAsync(pageSize, page, ord);
@@ -69,10 +69,10 @@ namespace SocialMedia.Services
             }
 
              
-            var veiwUsers = users!.Select(u => u.Toveiw()).ToList();
+            var veiwUsers = users!.Select(u => u.ToDTO()).ToList();
                 return new PagedResults<VeiwUsersDTO>
                 {
-                    Items = veiwUsers,
+                    Results = veiwUsers,
                     TotalCount = totalCount,
 
                 };
@@ -86,7 +86,7 @@ namespace SocialMedia.Services
             if (user == null)
                 return null;
 
-            return user.Toveiw();
+            return user.ToDTO();
         }
 
         public async Task<bool> UpdateUserAsync(Guid id, AddUsersDTO dto)

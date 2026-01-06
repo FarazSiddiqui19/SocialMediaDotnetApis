@@ -4,11 +4,11 @@ using System.Text.Json;
 
 namespace SocialMedia.models
 {
-    public class Posts
+    public class Post
     {
         
 
-        [Key] public Guid PostId { get; set; }
+        [Key] public Guid Id { get; set; }
 
         public Guid UserId { get; set; }
 
@@ -20,7 +20,7 @@ namespace SocialMedia.models
 
         public List<PostReaction>? Reactions { get; set; }
 
-        public virtual Users? User { get; set; }
+        public virtual User? User { get; set; }
 
 
 

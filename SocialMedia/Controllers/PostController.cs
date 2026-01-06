@@ -17,7 +17,7 @@ namespace SocialMedia.Controllers
         }
 
         [HttpPost("/getAllPosts")]
-        public async Task<ActionResult<VeiwPostsDTO>> Get([FromBody]PostsFilterDTO filters,Guid? UserId)
+        public async Task<ActionResult<PostResponse>> Get([FromBody]PostsFilterDTO filters,Guid? UserId)
         {
             var postList = await _postService.GetAllPostsAsync(filters, UserId);
             return Ok(postList);
@@ -29,7 +29,7 @@ namespace SocialMedia.Controllers
             var createdPost = await _postService.CreatePostAsync(postDto);
             return CreatedAtAction(
                 nameof(GetPostByID),
-                new { PostId = createdPost.PostId },
+                new { PostId = createdPost.Id },
                 createdPost
             );
         }

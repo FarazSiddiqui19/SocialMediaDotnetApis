@@ -5,14 +5,11 @@ namespace SocialMedia.Services.Interfaces
 {
     public interface IPostsServices
     {
-        Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto);
+        Task<PostResponse> CreatePostAsync(AddPostsDTO dto);
 
-        Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(PostsFilterDTO filters,
+        Task<PagedResults<PostResponse>> GetAllPostsAsync(PostsFilterDTO filters,
                                                                           Guid? UserId);
-        Task<PagedResults<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid? UserId, PostsFilterDTO filter);
-
-
-        Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id);
+        Task<PostResponse?> GetPostByIdAsync(Guid id);
 
         Task<bool> DeletePostAsync(Guid id);
 

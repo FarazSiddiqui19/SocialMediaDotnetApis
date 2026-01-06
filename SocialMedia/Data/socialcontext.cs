@@ -8,14 +8,14 @@ namespace SocialMedia.Data
         public SocialContext(DbContextOptions<SocialContext> options) : base(options)
         {
         }
-        public DbSet<Users> Users { get; set; }
-        public DbSet<Posts> Posts { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Post> Posts { get; set; }
 
         public DbSet<PostReaction> PostReactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Posts>(entity =>
+            modelBuilder.Entity<Post>(entity =>
             {
                 entity.HasOne(p => p.User).WithMany(a => a.Posts)
                 .HasForeignKey(p => p.UserId)
@@ -31,13 +31,13 @@ namespace SocialMedia.Data
                       .IsUnique();
 
 
-              entity.HasOne<Posts>()
+              entity.HasOne<Post>()
                   .WithMany(p => p.Reactions)
                   .HasForeignKey(r => r.PostId)
                   .OnDelete(DeleteBehavior.Cascade);
 
 
-                entity.HasOne<Users>()
+                entity.HasOne<User>()
                   .WithMany()
                   .HasForeignKey(r => r.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
@@ -45,7 +45,7 @@ namespace SocialMedia.Data
 
 
 
-            modelBuilder.Entity<Posts>(entity =>
+            modelBuilder.Entity<Post>(entity =>
             {
                 entity.Property(e => e.Content).HasColumnType("jsonb");
             });

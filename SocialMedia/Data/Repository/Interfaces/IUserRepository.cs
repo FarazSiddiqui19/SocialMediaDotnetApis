@@ -5,17 +5,17 @@ namespace SocialMedia.Data.Repository.Interfaces
     public interface IUserRepository
     {
        
-        IQueryable<Users> UserQuery();
+        IQueryable<User> UserQuery();
 
-        Task<Users?> GetUserByIdAsync(Guid userId);
-        Task<List<Users>?> GetAllUsersAsync(int pagesize,int page,SortOrder ord);
+        Task<User?> GetUserByIdAsync(Guid userId);
+        Task<List<User>?> GetAllUsersAsync(int pagesize,int page,SortOrder ord);
 
-        Task<List<Users>?> GetUserByNameAsync(string name,int pagesize,int page,SortOrder ord);
-        Task AddUserAsync(Users user);
+        Task<List<User>?> GetUserByNameAsync(string name,int pagesize,int page,SortOrder ord);
+        Task AddUserAsync(User user);
 
-        Task<bool> UpdateUserAsync(Users user);
+        Task<bool> UpdateUserAsync(User user);
 
-        Task<bool> DeleteUserAsync(Users user);
+        Task<bool> DeleteUserAsync(User user);
 
     }
 }
