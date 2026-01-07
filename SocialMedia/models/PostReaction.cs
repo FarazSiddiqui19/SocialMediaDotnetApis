@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.models
+﻿using System.Text.Json.Serialization;
+
+namespace SocialMedia.models
 {
     public class PostReaction
     {
@@ -10,7 +12,9 @@
         public ReactionType Type { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
+
+
+
     }
 
 

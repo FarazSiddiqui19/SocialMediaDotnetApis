@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.PostReaction;
 using SocialMedia.models.DTO.Posts;
+using SocialMedia.models.DTO.Users;
 using SocialMedia.Services.Interfaces;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -13,108 +18,132 @@ namespace SocialMedia.Services
     public class PostServices : IPostsServices
     {
         private readonly IPostRepository _postRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IPostReactionRepository _postReactionRepository;
 
-        public PostServices(IPostRepository postRepository, IUserRepository userRepository)
+
+
+
+        public PostServices(IPostRepository postRepository, IPostReactionRepository postReactionRepository)
         {
             _postRepository = postRepository;
-            _userRepository = userRepository;
+            _postReactionRepository = postReactionRepository;
+
         }
 
 
-        public async Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto)
+        public async Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto)
         {
-            var userExists = await _userRepository.GetUserByIdAsync(dto.UserId);
-            var post = dto.ToPost();
+
+
+            Post? post = dto.ToEntity();
             await _postRepository.AddPostAsync(post);
 
-            return post.Toveiw();
+
+            return post.ToDTO();
 
         }
 
         public async Task<bool> DeletePostAsync(Guid id)
         {
-            var posts = await _postRepository.GetPostByIdAsync(id);
+            Post? post = await _postRepository.GetPostByIdAsync(id);
 
-            if (posts == null)
+            if (post == null)
             {
                 return false;
             }
 
-            return await _postRepository.DeletePostAsync(posts);
+            return await _postRepository.DeletePostAsync(post);
         }
 
-        public async Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize, SortingOrder order)
+        public async Task<PagedResults<PostResponseDTO>> GetAllPostsAsync(PostsFilterDTO filters,
+                                                                        Guid? UserId)
         {
-            var posts = _postRepository.PostQuery();
 
-            if (!string.IsNullOrWhiteSpace(Title))
+            PagedResults<PostResponseDTO> postslist = await _postRepository.GetAllPosts(filters);
+
+            if (postslist.TotalCount == 0)
             {
-                posts = posts.Where(p => p.Title.ToLower().Contains(Title.ToLower()));
+                return new PagedResults<PostResponseDTO>
+                {
+                    Results = new List<PostResponseDTO>(),
+                    TotalCount = 0,
+                };
+
             }
 
-            if(order == SortingOrder.Asc)
-            {
-                posts = posts.OrderBy(p => p.CreatedAt);
-            }
-            else
-            {
-                posts = posts.OrderByDescending(p => p.CreatedAt);
-            }
+            return postslist;
 
-            var totalCount = await posts.CountAsync();
+        }
 
-            var result = await posts
-                          .Skip((page - 1) * pageSize)
-                          .Take(pageSize)
-                          .Select(p => p.Toveiw())
-                          .ToListAsync();
 
-            return new PagedResults<VeiwPostsDTO>
-            {
-                Items = result,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
-           }
 
-       
 
-        public async Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id)
+
+        public async Task<PostResponseDTO?> GetPostByIdAsync(Guid id)
         {
-            var post = await _postRepository.GetPostByIdAsync(id);
+            Post? post = await _postRepository.GetPostByIdAsync(id);
+
             if (post == null)
             {
                 return null;
             }
-            return post.Toveiw();
+
+            List<PostReaction>? reactions = post.Reactions;
+
+
+
+            return post.ToDTO();
         }
 
-        public async Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId)
+
+
+        public async Task<bool> UpdatePostAsync(Guid id, CreatePostDTO UpdatedPost)
         {
-
-            var post = _postRepository.PostQuery()
-                                         .Where(p => p.UserId == userId);
-
-            return post.Select(posts => posts.Toveiw()).ToList();
-
-
-        }
-
-        public async Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto)
-        {
-            var existingPost = await _postRepository.GetPostByIdAsync(id);
+            Post? existingPost = await _postRepository.GetPostByIdAsync(id);
             if (existingPost == null)
             {
                 return false;
             }
 
-            existingPost.Title = dto.Title;
-            existingPost.Content = PostContentBuilder.Build(dto.Body);
+            existingPost.Title = UpdatedPost.Title;
+            existingPost.Content = UpdatedPost.Content;
             return await _postRepository.UpdatePostAsync(existingPost);
         }
 
-       
+        public async Task<bool> PostReaction(ReactToPostDTO Reaction)
+        {
+            PostReaction? existingReaction = await _postReactionRepository.GetUserReactionToPostAsync(Reaction.PostId, Reaction.UserId);
+            var testing = await _postRepository.TestReaction(Reaction);
+            if (existingReaction == null)
+            {
+                PostReaction newReaction = Reaction.ToEntity();
+                await _postReactionRepository.AddAsync(newReaction);
+
+            }
+            else
+            {
+                if (existingReaction.Type == Reaction.Type)
+                {
+
+                    await _postReactionRepository.DeleteAsync(existingReaction);
+
+                }
+                else
+                {
+
+                    existingReaction.Type = Reaction.Type;
+                    await _postReactionRepository.UpdateAsync(existingReaction);
+                }
+
+            }
+
+            return true;
+
+
+        }
+
+
+
+
     }
 }

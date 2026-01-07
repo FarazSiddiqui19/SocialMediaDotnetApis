@@ -5,20 +5,19 @@ namespace SocialMedia.mappers
 {
     public static class UserMapper
     {
-        public static Users ToUser(this AddUsersDTO dto)
+        public static User ToEntity(this CreateUserDTO dto)
         {
-            return new Users
+            return new User
             {
-                UserId = Guid.NewGuid(),
                 Username = dto.Username
             };
         }
 
-        public static VeiwUsersDTO Toveiw(this Users user)
+        public static UserResponseDto ToDTO(this User user)
         {
-            return new VeiwUsersDTO
+            return new UserResponseDto
             {
-                Id = user.UserId,
+                Id = user.Id,
                 Username = user.Username
             };
         }

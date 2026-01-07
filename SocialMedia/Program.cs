@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Npgsql;
+using SocialMedia.Data;
 using SocialMedia.Data.Repository;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.Services;
 using SocialMedia.Services.Interfaces;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,14 +18,36 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(
         Options => { 
             Options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+           
         }
     );
+
+
+
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 
 builder.Services.AddDbContext<SocialMedia.Data.SocialContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<SocialContext>(options =>
+{
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions =>
+        {
+            
+        });
+});
+
+
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .EnableDynamicJson()
+    .Build();
+
+builder.Services.AddDbContext<SocialContext>(options => options.UseNpgsql(dataSourceBuilder));
 
 
 

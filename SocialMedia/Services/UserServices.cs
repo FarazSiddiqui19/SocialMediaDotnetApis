@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
@@ -19,18 +20,19 @@ namespace SocialMedia.Services
         }
 
        
-        public async Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto)
+        public async Task<UserResponseDto> CreateUserAsync(CreateUserDTO dto)
         {
-            var user = dto.ToUser();
+            User user = dto.ToEntity();
+
             await _userRepository.AddUserAsync(user);
-            return user.Toveiw();
+            return user.ToDTO();
 
         }
 
         public async Task<bool> DeleteUserAsync(Guid id)
         {
             
-            var user = await _userRepository.GetUserByIdAsync(id);
+            User? user = await _userRepository.GetUserByIdAsync(id);
 
             if (user == null)
             {
@@ -41,63 +43,40 @@ namespace SocialMedia.Services
             return true;
         }
 
-        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize, SortingOrder ord)
+        public async Task<PagedResults<UserResponseDto>> GetAllUsersAsync(UsersFilter filter)
         {
-            var users = _userRepository.UserQuery();
+            string? Username = filter.Username;
+            int page = filter.page;
+            int pageSize = filter.pageSize;
+            SortOrder orderby = filter.orderby;
+          PagedResults<UserResponseDto> UsersList = await _userRepository
+                                                    .GetAllUsersAsync(Username, page, pageSize, orderby);
 
-            if (!string.IsNullOrEmpty(Username))
-            {
-                users = users.Where(u => u.Username.ToLower().Contains(Username.ToLower()));
+            return UsersList;
 
-            }
-
-            if(ord == SortingOrder.Desc)
-            {
-                users = users.OrderByDescending(u => u.Username);
-            }
-            else
-            {
-                users = users.OrderBy(u => u.Username);
-            }
-
-            var totalCount = await users.CountAsync();
-
-            var result = await users
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(u=>u.Toveiw())
-                .ToListAsync();
-
-
-
-            return new PagedResults<VeiwUsersDTO>
-            {
-                Items = result,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
         }
 
-        public async Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id)
+        public async Task<UserResponseDto?> GetUserByIdAsync(Guid id)
         {
-            var user  = await _userRepository.GetUserByIdAsync(id);
+            User? user  = await _userRepository.GetUserByIdAsync(id);
 
             if (user == null)
                 return null;
 
-            return user.Toveiw();
+            return user.ToDTO();
         }
 
-        public async Task<bool> UpdateUserAsync(Guid id, AddUsersDTO dto)
+        public async Task<bool> UpdateUserAsync(Guid id, CreateUserDTO dto)
         {
-            var existingUser = await _userRepository.GetUserByIdAsync(id);
+            User? existingUser = await _userRepository.GetUserByIdAsync(id);
             if (existingUser == null)
             {
                 return false;
             }
             existingUser.Username = dto.Username;
+
             await _userRepository.UpdateUserAsync(existingUser);
+
             return true;
         }
 

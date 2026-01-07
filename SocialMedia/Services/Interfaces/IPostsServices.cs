@@ -1,21 +1,22 @@
 ﻿using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.PostReaction;
 using SocialMedia.models.DTO.Posts;
 
 namespace SocialMedia.Services.Interfaces
 {
     public interface IPostsServices
     {
-        Task<VeiwPostsDTO> CreatePostAsync(AddPostsDTO dto);
+        Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto);
 
-        Task<PagedResults<VeiwPostsDTO>> GetAllPostsAsync(string? Title, int page, int pageSize, SortingOrder order);
-        Task<List<VeiwPostsDTO>> GetPostsByUserIdAsync(Guid userId);
-
-
-        Task<VeiwPostsDTO?> GetPostByIdAsync(Guid id);
+        Task<PagedResults<PostResponseDTO>> GetAllPostsAsync(PostsFilterDTO filters,
+                                                                          Guid? UserId);
+        Task<PostResponseDTO?> GetPostByIdAsync(Guid id);
 
         Task<bool> DeletePostAsync(Guid id);
 
-        Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto);
+        Task<bool> UpdatePostAsync(Guid id, CreatePostDTO dto);
+
+        Task<bool> PostReaction(ReactToPostDTO Reaction);
 
 
     }

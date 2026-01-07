@@ -14,7 +14,7 @@ namespace SocialMedia.Data.Repository
             _context = context;
         }
 
-        public async Task<IQueryable<PostReaction>> GetPostReactionAsync() { 
+        public IQueryable<PostReaction> GetPostReactionAsync() { 
             return _context.PostReactions.AsQueryable();
         }
         public async Task<PostReaction> GetReactionByID(Guid reactionId) {
@@ -33,6 +33,12 @@ namespace SocialMedia.Data.Repository
             }
 
             return postReaction;
+        }
+
+        public async Task<PostReaction?> GetUserReactionToPostAsync(Guid postId, Guid userId)
+        {
+            return await _context.PostReactions
+                .FirstOrDefaultAsync(r => r.PostId == postId && r.UserId == userId);
         }
 
         public async Task AddAsync(PostReaction reaction)

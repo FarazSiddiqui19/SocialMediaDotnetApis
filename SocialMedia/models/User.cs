@@ -2,11 +2,13 @@
 
 namespace SocialMedia.models
 {
-    public class Users
+    public class User
     {
-        [Key] public Guid UserId { get; set; }
+        [Key] public Guid Id { get; set; }
 
         public required string Username { get; set; }
+
+        public virtual List<Post>? Posts { get; set; }
 
     }
 }
