@@ -3,10 +3,10 @@ using System;
 
 namespace SocialMedia.models.DTO.Users
 {
-    public class VeiwUsersDTO
+    public class UserResponseDto
     {
         public Guid Id { get; set; }
-        public string Username { get; set; } = string.Empty;
+        public required string Username { get; set; }
         
     }
 }

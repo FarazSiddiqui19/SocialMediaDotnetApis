@@ -21,28 +21,20 @@ namespace SocialMedia.Controllers
 
 
 
-        [HttpGet]
+        [HttpPost]
+        [Route("GetUsersList")]
 
-        public async Task<IActionResult> Get([FromQuery] string? Username,int page=1,int pagesize=2,SortOrder order=SortOrder.Ascending)
+        public async Task<IActionResult> Get([FromBody] UsersFilter filter)
         {
-            var userlist = await _usersService.GetAllUsersAsync(Username,page,pagesize, order);
-            return Ok(userlist);
+            PagedResults<UserResponseDto> userslist = await _usersService.GetAllUsersAsync(filter);
+            return Ok(userslist);
         }
 
-        [HttpGet("{UserId:guid}")]
-        public async Task<IActionResult> GetUserByID([FromRoute] Guid UserId)
-        {
-            var user = await _usersService.GetUserByIdAsync(UserId);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
-        }
-
+      
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] AddUsersDTO user)
+        [Route("CreateUser")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO user)
         {
             var createdUser = await _usersService.CreateUserAsync(user);
 
@@ -53,25 +45,30 @@ namespace SocialMedia.Controllers
             );
         }
 
-        [HttpDelete("{UserId:guid}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] Guid UserId)
+        [HttpGet("{Id:guid}")]
+        public async Task<IActionResult> GetUserByID([FromRoute] Guid Id)
         {
-            await _usersService.DeleteUserAsync(UserId);
+            var user = await _usersService.GetUserByIdAsync(Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
+
+        [HttpDelete("{Id:guid}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] Guid Id)
+        {
+            await _usersService.DeleteUserAsync(Id);
             return NoContent();
         }
 
 
-        [HttpPatch("{UserId:guid}")]
-        public async Task<IActionResult> UpdateUser([FromRoute] Guid UserId)
+        [HttpPut("{Id:guid}")]
+        public async Task<IActionResult> UpdateUserPut([FromRoute] Guid Id, [FromBody] CreateUserDTO updatedUser)
         {
-
-            return NoContent();
-        }
-
-        [HttpPut("{UserId:guid}")]
-        public async Task<IActionResult> UpdateUserPut([FromRoute] Guid UserId, [FromBody] AddUsersDTO updatedUser)
-        {
-            var user = await _usersService.UpdateUserAsync(UserId, updatedUser);
+            var user = await _usersService.UpdateUserAsync(Id, updatedUser);
             if (user == false)
             {
                 return NotFound();

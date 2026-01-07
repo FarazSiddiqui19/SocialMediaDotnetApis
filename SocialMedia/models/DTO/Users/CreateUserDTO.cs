@@ -1,6 +1,6 @@
 ﻿namespace SocialMedia.models.DTO.Users
 {
-    public class AddUsersDTO
+    public class CreateUserDTO
     {
         public required string Username { get; set; }
     }

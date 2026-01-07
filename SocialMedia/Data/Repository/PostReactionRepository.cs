@@ -35,6 +35,12 @@ namespace SocialMedia.Data.Repository
             return postReaction;
         }
 
+        public async Task<PostReaction?> GetUserReactionToPostAsync(Guid postId, Guid userId)
+        {
+            return await _context.PostReactions
+                .FirstOrDefaultAsync(r => r.PostId == postId && r.UserId == userId);
+        }
+
         public async Task AddAsync(PostReaction reaction)
         {
             _context.PostReactions.Add(reaction);

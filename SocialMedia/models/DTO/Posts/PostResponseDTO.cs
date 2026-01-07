@@ -2,7 +2,7 @@
 
 namespace SocialMedia.models.DTO.Posts
 {
-    public class PostResponse
+    public class PostResponseDTO
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }

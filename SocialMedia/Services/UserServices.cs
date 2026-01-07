@@ -20,9 +20,9 @@ namespace SocialMedia.Services
         }
 
        
-        public async Task<VeiwUsersDTO> CreateUserAsync(AddUsersDTO dto)
+        public async Task<UserResponseDto> CreateUserAsync(CreateUserDTO dto)
         {
-            var user = dto.ToEntity();
+            User user = dto.ToEntity();
 
             await _userRepository.AddUserAsync(user);
             return user.ToDTO();
@@ -32,7 +32,7 @@ namespace SocialMedia.Services
         public async Task<bool> DeleteUserAsync(Guid id)
         {
             
-            var user = await _userRepository.GetUserByIdAsync(id);
+            User? user = await _userRepository.GetUserByIdAsync(id);
 
             if (user == null)
             {
@@ -43,45 +43,22 @@ namespace SocialMedia.Services
             return true;
         }
 
-        public async Task<PagedResults<VeiwUsersDTO>> GetAllUsersAsync(string? Username, int page, int pageSize, SortOrder ord)
+        public async Task<PagedResults<UserResponseDto>> GetAllUsersAsync(UsersFilter filter)
         {
-            List<User>? users;
-            int totalCount = 0;
-            if (string.IsNullOrEmpty(Username)) {
-                users = await _userRepository.GetAllUsersAsync(pageSize, page, ord);
+            string? Username = filter.Username;
+            int page = filter.page;
+            int pageSize = filter.pageSize;
+            SortOrder orderby = filter.orderby;
+          PagedResults<UserResponseDto> UsersList = await _userRepository
+                                                    .GetAllUsersAsync(Username, page, pageSize, orderby);
 
-            }
+            return UsersList;
 
-            else
-            {
-                users = await _userRepository.GetUserByNameAsync(Username!, pageSize, page, ord);
-            }
-
-
-            if (users!.Count == 0 || users == null)
-            {
-                totalCount = 0;
-
-            }
-
-            else { 
-                totalCount = users.Count;
-            }
-
-             
-            var veiwUsers = users!.Select(u => u.ToDTO()).ToList();
-                return new PagedResults<VeiwUsersDTO>
-                {
-                    Results = veiwUsers,
-                    TotalCount = totalCount,
-
-                };
-          
         }
 
-        public async Task<VeiwUsersDTO?> GetUserByIdAsync(Guid id)
+        public async Task<UserResponseDto?> GetUserByIdAsync(Guid id)
         {
-            var user  = await _userRepository.GetUserByIdAsync(id);
+            User? user  = await _userRepository.GetUserByIdAsync(id);
 
             if (user == null)
                 return null;
@@ -89,30 +66,14 @@ namespace SocialMedia.Services
             return user.ToDTO();
         }
 
-        public async Task<bool> UpdateUserAsync(Guid id, AddUsersDTO dto)
+        public async Task<bool> UpdateUserAsync(Guid id, CreateUserDTO dto)
         {
-            var existingUser = await _userRepository.GetUserByIdAsync(id);
+            User? existingUser = await _userRepository.GetUserByIdAsync(id);
             if (existingUser == null)
             {
                 return false;
             }
             existingUser.Username = dto.Username;
-
-            try
-            {
-                await _userRepository.UpdateUserAsync(existingUser);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (await _userRepository.GetUserByIdAsync(id) == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    throw;
-                }
-            }
 
             await _userRepository.UpdateUserAsync(existingUser);
 

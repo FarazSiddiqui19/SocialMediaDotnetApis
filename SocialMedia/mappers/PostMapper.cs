@@ -9,7 +9,7 @@ namespace SocialMedia.mappers
     public static class PostMapper
     {
 
-        public static Post ToEntity(this AddPostsDTO dto)
+        public static Post ToEntity(this CreatePostDTO dto)
         {
 
             return new Post
@@ -21,7 +21,7 @@ namespace SocialMedia.mappers
             };
         }
 
-        public static PostResponse ToDTO(this Post post)
+        public static PostResponseDTO ToDTO(this Post post)
         {
            
             int upvotes = post.Reactions?.Count(r => r.Type == ReactionType.Upvote) ?? 0;
@@ -30,7 +30,7 @@ namespace SocialMedia.mappers
 
 
 
-            return new PostResponse
+            return new PostResponseDTO
             {
                 UserId = post.UserId,
                 Id = post.Id,

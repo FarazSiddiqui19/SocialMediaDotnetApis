@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.PostReaction;
 using SocialMedia.models.DTO.Posts;
 using SocialMedia.Services.Interfaces;
 
@@ -10,21 +11,24 @@ namespace SocialMedia.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostsServices _postService;
+      
 
         public PostController(IPostsServices postServices)
         {
             _postService = postServices;
+           
         }
 
-        [HttpPost("/getAllPosts")]
-        public async Task<ActionResult<PostResponse>> Get([FromBody]PostsFilterDTO filters,Guid? UserId)
+        [HttpPost]
+        [Route("GetPostsList")]
+        public async Task<ActionResult<PostResponseDTO>> Get([FromBody]PostsFilterDTO filters,Guid? UserId)
         {
             var postList = await _postService.GetAllPostsAsync(filters, UserId);
             return Ok(postList);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreatePost([FromBody] AddPostsDTO postDto)
+        [HttpPost("/CreatePost")]
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostDTO postDto)
         {
             var createdPost = await _postService.CreatePostAsync(postDto);
             return CreatedAtAction(
@@ -34,10 +38,19 @@ namespace SocialMedia.Controllers
             );
         }
 
-        [HttpGet("{PostId:guid}")]
-        public async Task<IActionResult> GetPostByID([FromRoute] Guid PostId)
+        [HttpPost]
+        [Route("React")]
+        public async Task<IActionResult> ReactToPost([FromBody] ReactToPostDTO Reaction)
         {
-            var post = await _postService.GetPostByIdAsync(PostId);
+           await _postService.PostReaction(Reaction);
+            
+            return NoContent();
+        }
+
+        [HttpGet("{Id:guid}")]
+        public async Task<IActionResult> GetPostByID([FromRoute] Guid Id)
+        {
+            var post = await _postService.GetPostByIdAsync(Id);
             if (post == null)
             {
                 return NotFound();
@@ -45,23 +58,23 @@ namespace SocialMedia.Controllers
             return Ok(post);
         }
 
-        [HttpDelete("{PostId:guid}")]
-        public async Task<IActionResult> DeletePost([FromRoute] Guid PostId)
+        [HttpDelete("{Id:guid}")]
+        public async Task<IActionResult> DeletePost([FromRoute] Guid Id)
         {
-            await _postService.DeletePostAsync(PostId);
+            await _postService.DeletePostAsync(Id);
             return NoContent();
         }
 
 
-        [HttpPut("{PostId:guid}")]
-        public async Task<IActionResult> UpdatePost([FromRoute] Guid PostId, [FromBody] AddPostsDTO updt)
+        [HttpPut("{Id:guid}")]
+        public async Task<IActionResult> UpdatePost([FromRoute] Guid Id, [FromBody] CreatePostDTO UpdatedPost)
         {
-            var post = await _postService.GetPostByIdAsync(PostId);
+            var post = await _postService.GetPostByIdAsync(Id);
             if (post == null)
             {
                 return NotFound();
             }
-            await _postService.UpdatePostAsync(PostId, updt);
+            await _postService.UpdatePostAsync(Id, UpdatedPost);
             return NoContent();
         }
     }

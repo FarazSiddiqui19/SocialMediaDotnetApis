@@ -7,6 +7,7 @@ using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.PostReaction;
 using SocialMedia.models.DTO.Posts;
 using SocialMedia.models.DTO.Users;
 using SocialMedia.Services.Interfaces;
@@ -17,24 +18,26 @@ namespace SocialMedia.Services
     public class PostServices : IPostsServices
     {
         private readonly IPostRepository _postRepository;
-     
-       
+        private readonly IPostReactionRepository _postReactionRepository;
 
 
-        public PostServices(IPostRepository postRepository)
+
+
+        public PostServices(IPostRepository postRepository, IPostReactionRepository postReactionRepository)
         {
             _postRepository = postRepository;
-          
+            _postReactionRepository = postReactionRepository;
+
         }
 
 
-        public async Task<PostResponse> CreatePostAsync(AddPostsDTO dto)
+        public async Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto)
         {
-          
+
 
             Post? post = dto.ToEntity();
             await _postRepository.AddPostAsync(post);
-         
+
 
             return post.ToDTO();
 
@@ -52,16 +55,17 @@ namespace SocialMedia.Services
             return await _postRepository.DeletePostAsync(post);
         }
 
-        public async Task<PagedResults<PostResponse>> GetAllPostsAsync(PostsFilterDTO filters,
+        public async Task<PagedResults<PostResponseDTO>> GetAllPostsAsync(PostsFilterDTO filters,
                                                                         Guid? UserId)
         {
-           
-            PagedResults<PostResponse> postslist = await _postRepository.GetAllPosts(filters);
 
-            if (postslist.TotalCount == 0) { 
-                return new PagedResults<PostResponse>
+            PagedResults<PostResponseDTO> postslist = await _postRepository.GetAllPosts(filters);
+
+            if (postslist.TotalCount == 0)
+            {
+                return new PagedResults<PostResponseDTO>
                 {
-                    Results = new List<PostResponse>(),
+                    Results = new List<PostResponseDTO>(),
                     TotalCount = 0,
                 };
 
@@ -75,7 +79,7 @@ namespace SocialMedia.Services
 
 
 
-        public async Task<PostResponse?> GetPostByIdAsync(Guid id)
+        public async Task<PostResponseDTO?> GetPostByIdAsync(Guid id)
         {
             Post? post = await _postRepository.GetPostByIdAsync(id);
 
@@ -86,14 +90,14 @@ namespace SocialMedia.Services
 
             List<PostReaction>? reactions = post.Reactions;
 
-          
-           
+
+
             return post.ToDTO();
         }
 
-     
 
-        public async Task<bool> UpdatePostAsync(Guid id, AddPostsDTO dto)
+
+        public async Task<bool> UpdatePostAsync(Guid id, CreatePostDTO UpdatedPost)
         {
             Post? existingPost = await _postRepository.GetPostByIdAsync(id);
             if (existingPost == null)
@@ -101,10 +105,44 @@ namespace SocialMedia.Services
                 return false;
             }
 
-            existingPost.Title = dto.Title;
-            existingPost.Content = dto.Content;
+            existingPost.Title = UpdatedPost.Title;
+            existingPost.Content = UpdatedPost.Content;
             return await _postRepository.UpdatePostAsync(existingPost);
         }
+
+        public async Task<bool> PostReaction(ReactToPostDTO Reaction)
+        {
+            PostReaction? existingReaction = await _postReactionRepository.GetUserReactionToPostAsync(Reaction.PostId, Reaction.UserId);
+            var testing = await _postRepository.TestReaction(Reaction);
+            if (existingReaction == null)
+            {
+                PostReaction newReaction = Reaction.ToEntity();
+                await _postReactionRepository.AddAsync(newReaction);
+
+            }
+            else
+            {
+                if (existingReaction.Type == Reaction.Type)
+                {
+
+                    await _postReactionRepository.DeleteAsync(existingReaction);
+
+                }
+                else
+                {
+
+                    existingReaction.Type = Reaction.Type;
+                    await _postReactionRepository.UpdateAsync(existingReaction);
+                }
+
+            }
+
+            return true;
+
+
+        }
+
+
 
 
     }

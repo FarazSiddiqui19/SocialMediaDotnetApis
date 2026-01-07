@@ -5,6 +5,8 @@ public interface IPostReactionRepository
 {
     IQueryable<PostReaction> GetPostReactionAsync();
 
+    Task<PostReaction?> GetUserReactionToPostAsync(Guid postId, Guid userId);
+
     Task<PostReaction> GetReactionByID(Guid reactionId);
     Task AddAsync(PostReaction reaction);
     Task UpdateAsync(PostReaction reaction);

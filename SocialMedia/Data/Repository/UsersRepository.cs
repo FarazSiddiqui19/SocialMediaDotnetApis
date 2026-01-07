@@ -2,7 +2,10 @@
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data;
 using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.mappers;
 using SocialMedia.models;
+using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.Users;
 using System.Linq.Expressions;
 
 namespace SocialMedia.Data.Repository
@@ -11,20 +14,16 @@ namespace SocialMedia.Data.Repository
     {
         private readonly SocialContext _context;
         private readonly DbSet<User> _Users;
-        private IQueryable<User> _QueryUsers;
+       
         public UsersRepository(SocialContext context) {
             _context = context;
             _Users = _context.Users;
-            _QueryUsers = context.Users.AsQueryable();
 
-        }
-
-        public IQueryable<User> UserQuery() {
-            return _QueryUsers;
         }
 
         public async Task<User?> GetUserByIdAsync(Guid userId) 
         {
+
             return await _Users.FindAsync(userId);
         }
         public async Task AddUserAsync(User user) 
@@ -33,49 +32,73 @@ namespace SocialMedia.Data.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<User>?> GetAllUsersAsync(int pagesize, int page, SortOrder order) 
+        public async Task<PagedResults<UserResponseDto>> GetAllUsersAsync(string? name ,int pagesize, int page, SortOrder order) 
         {
-            if(order == SortOrder.Descending)
+
+            IQueryable<User> QueryUsers;
+            List<UserResponseDto> QueryResult;
+            int TotalUsers;
+
+
+            if (name != null)
             {
-                return await _Users
-                .OrderByDescending(u => u.Username)
-                .Skip((page - 1) * pagesize)
-                .Take(pagesize)
-                .ToListAsync();
+                QueryUsers = _Users
+                              .Where(u => u.Username.StartsWith(name));
             }
 
-            return await _Users
-                .OrderBy(u => u.Username)
-                .Skip((page - 1) * pagesize)
-                .Take(pagesize)
-                .ToListAsync();
-        }
+            else {
 
-        public async Task<List<User>?> GetUserByNameAsync(string name,int pagesize, int page,SortOrder order) 
-        {
+                QueryUsers = _Users;
+            }
 
-           
+
+
+            TotalUsers = await QueryUsers.CountAsync();
+
+            if (TotalUsers == 0)
+            {
+                return new PagedResults<UserResponseDto>
+                {
+                    Results = new List<UserResponseDto>(),
+                    TotalCount = 0
+                };
+            }
+
 
             if (order == SortOrder.Descending)
             {
-                return await _Users
-                 .Where(u => u.Username.ToLower().Contains(name.ToLower()))
+
+                QueryResult = await QueryUsers
                  .OrderByDescending(u => u.Username)
+                 .Select(u => u.ToDTO())
+                 .Skip((page - 1) * pagesize)
+                 .Take(pagesize)
+                 .ToListAsync();
+
+            }
+
+            else
+            {
+
+                QueryResult = await QueryUsers
+                 .OrderBy(u => u.Username)
+                 .Select(u => u.ToDTO())
                  .Skip((page - 1) * pagesize)
                  .Take(pagesize)
                  .ToListAsync();
             }
 
-          
+            return new PagedResults<UserResponseDto>
+            {
+                Results = QueryResult,
+                TotalCount = TotalUsers
+            };
 
-            return await _Users
-                .Where(u => u.Username.ToLower().Contains(name.ToLower()))
-                .OrderBy(u => u.Username)
-                .Skip((page - 1) * pagesize)
-                .Take(pagesize)
-                .ToListAsync();
+
 
         }
+
+      
 
 
         public async Task<bool> UpdateUserAsync(User user) 

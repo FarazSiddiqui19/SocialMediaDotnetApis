@@ -4,6 +4,7 @@ using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.models.DTO;
+using SocialMedia.models.DTO.PostReaction;
 using SocialMedia.models.DTO.Posts;
 
 namespace SocialMedia.Data.Repository
@@ -62,7 +63,7 @@ namespace SocialMedia.Data.Repository
        
 
 
-        public async Task<PagedResults<PostResponse>> GetAllPosts(PostsFilterDTO filter)
+        public async Task<PagedResults<PostResponseDTO>> GetAllPosts(PostsFilterDTO filter)
         {
             IQueryable<Post> query = _Posts
                                         .Include(p => p.Reactions);
@@ -134,14 +135,14 @@ namespace SocialMedia.Data.Repository
 
 
 
-            List<PostResponse>? QueryResult = await query
+            List<PostResponseDTO>? QueryResult = await query
                         .Skip((page - 1) * pagesize)
                         .Take(pagesize)
                          .Select(p => p.ToDTO())
                         .ToListAsync();
 
 
-            return new PagedResults<PostResponse>
+            return new PagedResults<PostResponseDTO>
                 {
                 Results = QueryResult,
                 TotalCount = TotalCount 
@@ -156,6 +157,24 @@ namespace SocialMedia.Data.Repository
             return true;
         }
 
+
+        public async Task<bool> TestReaction(ReactToPostDTO Reaction)
+        {
+            var postwithreactions = _Posts
+                                        .Where(p => p.Id == Reaction.PostId)
+                                        .Include(p => p.Reactions);
+            
+                                     
+
+            PostReaction? existingReaction = postwithreactions
+                                        .SelectMany(p => p.Reactions)
+                                        .Where(r => r.UserId == Reaction.UserId)
+                                        .FirstOrDefault();
+
+
+            return true;
+
+        }
       
 
        
