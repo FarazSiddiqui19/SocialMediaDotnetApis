@@ -1,4 +1,4 @@
-﻿namespace SocialMedia.models.DTO.Posts
+﻿namespace SocialMedia.DTO.Posts
 {
     public enum SortByParam
     {

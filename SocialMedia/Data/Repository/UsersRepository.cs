@@ -2,10 +2,10 @@
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data;
 using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.DTO;
+using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.Users;
 using System.Linq.Expressions;
 
 namespace SocialMedia.Data.Repository

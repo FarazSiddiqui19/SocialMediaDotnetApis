@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Data;
-using SocialMedia.models.DTO.Users;
-using SocialMedia.models.DTO;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SocialMedia.DTO;
+using SocialMedia.DTO.Users;
 using SocialMedia.Services.Interfaces;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using System.Security.Claims;
 
 
 namespace SocialMedia.Controllers
@@ -45,6 +44,20 @@ namespace SocialMedia.Controllers
             );
         }
 
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody]UserLoginDTO UserLoginRequest)
+        {
+          
+            var user = await _usersService.LoginAsync(UserLoginRequest.UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            return Ok(user);
+        }
+
         [HttpGet("{Id:guid}")]
         public async Task<IActionResult> GetUserByID([FromRoute] Guid Id)
         {
@@ -57,18 +70,36 @@ namespace SocialMedia.Controllers
         }
 
 
-        [HttpDelete("{Id:guid}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] Guid Id)
+        [HttpDelete]
+        [Route("Id")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUser()
         {
-            await _usersService.DeleteUserAsync(Id);
+            Claim? UserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+            if (UserIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            await _usersService.DeleteUserAsync(Guid.Parse(UserIdClaim.Value));
             return NoContent();
         }
 
 
-        [HttpPut("{Id:guid}")]
-        public async Task<IActionResult> UpdateUserPut([FromRoute] Guid Id, [FromBody] CreateUserDTO updatedUser)
+        [HttpPut]
+        [Route("Id")]
+        [Authorize]
+        public async Task<IActionResult> UpdateUser([FromBody] CreateUserDTO updatedUser)
         {
-            var user = await _usersService.UpdateUserAsync(Id, updatedUser);
+            Claim? UserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+            if (UserIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var user = await _usersService.UpdateUserAsync(Guid.Parse(UserIdClaim.Value), updatedUser);
             if (user == false)
             {
                 return NotFound();

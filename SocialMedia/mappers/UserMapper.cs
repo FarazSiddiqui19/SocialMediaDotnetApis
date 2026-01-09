@@ -1,5 +1,5 @@
-﻿using SocialMedia.models;
-using SocialMedia.models.DTO.Users;
+﻿using SocialMedia.DTO.Users;
+using SocialMedia.models;
 
 namespace SocialMedia.mappers
 {

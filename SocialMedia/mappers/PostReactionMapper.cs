@@ -1,5 +1,5 @@
-﻿using SocialMedia.models;
-using SocialMedia.models.DTO.PostReaction;
+﻿using SocialMedia.DTO.PostReaction;
+using SocialMedia.models;
 
 namespace SocialMedia.mappers
 {

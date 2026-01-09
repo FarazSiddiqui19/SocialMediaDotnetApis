@@ -1,6 +1,6 @@
-﻿using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.PostReaction;
-using SocialMedia.models.DTO.Posts;
+﻿using SocialMedia.DTO;
+using SocialMedia.DTO.PostReaction;
+using SocialMedia.DTO.Posts;
 
 namespace SocialMedia.Services.Interfaces
 {

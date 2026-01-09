@@ -1,21 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.DTO;
+using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.Posts;
-using SocialMedia.models.DTO.Users;
+using SocialMedia.DTO.Posts;
 using SocialMedia.Services.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace SocialMedia.Services
 {
     public class UserServices : IUsersServices
     {
         private readonly IUserRepository  _userRepository;
-       
-        public UserServices(IUserRepository userRepository) {
+        private readonly ITokenGeneratorService _tokenGeneratorService;
+        private readonly IConfiguration _config;
+
+        public UserServices(IUserRepository userRepository,IConfiguration config,ITokenGeneratorService tokenGeneratorService) {
             _userRepository = userRepository;
+            _tokenGeneratorService = tokenGeneratorService;
+            _config = config;
           
         }
 
@@ -50,7 +59,7 @@ namespace SocialMedia.Services
             int pageSize = filter.pageSize;
             SortOrder orderby = filter.orderby;
           PagedResults<UserResponseDto> UsersList = await _userRepository
-                                                    .GetAllUsersAsync(Username, page, pageSize, orderby);
+                                                    .GetAllUsersAsync(Username, pagesize:pageSize, page:page, orderby);
 
             return UsersList;
 
@@ -80,6 +89,26 @@ namespace SocialMedia.Services
             return true;
         }
 
+
+        public async Task<UserLoginResposeDTO?> LoginAsync(Guid UserId)
+        {
+            User? user = await _userRepository.GetUserByIdAsync(UserId);
+            if (user == null)
+                return null;
+
+            TokenDTO? jwtToken = await _tokenGeneratorService.GenerateTokenAsync(user.Id,user.Username);
+
+            if (String.IsNullOrEmpty(jwtToken.Token))
+                return null;
+
+            return new UserLoginResposeDTO
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Token = jwtToken.Token,
+                TokenExpiry = TimeZoneInfo.ConvertTimeFromUtc(jwtToken.TokenExpiryTime, TimeZoneInfo.Local)
+            };
+        }
 
     }
 }

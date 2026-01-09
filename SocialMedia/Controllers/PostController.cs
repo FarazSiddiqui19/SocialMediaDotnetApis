@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.PostReaction;
-using SocialMedia.models.DTO.Posts;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SocialMedia.DTO;
+using SocialMedia.DTO.PostReaction;
+using SocialMedia.DTO.Posts;
+using SocialMedia.models;
 using SocialMedia.Services.Interfaces;
+using System.Security.Claims;
 
 namespace SocialMedia.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class PostController : ControllerBase
     {
         private readonly IPostsServices _postService;
@@ -23,6 +27,11 @@ namespace SocialMedia.Controllers
         [Route("GetPostsList")]
         public async Task<ActionResult<PostResponseDTO>> Get([FromBody]PostsFilterDTO filters,Guid? UserId)
         {
+        
+
+            var UserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            
+            Console.WriteLine($"UserId from token: {UserIdClaim.Value}");
             var postList = await _postService.GetAllPostsAsync(filters, UserId);
             return Ok(postList);
         }
@@ -61,6 +70,19 @@ namespace SocialMedia.Controllers
         [HttpDelete("{Id:guid}")]
         public async Task<IActionResult> DeletePost([FromRoute] Guid Id)
         {
+            PostResponseDTO? post = await _postService.GetPostByIdAsync(Id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            string? creatorId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+           
+            if (creatorId == null || post.UserId.ToString() != creatorId)
+            {
+                return Forbid();
+            }
             await _postService.DeletePostAsync(Id);
             return NoContent();
         }
@@ -70,6 +92,8 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> UpdatePost([FromRoute] Guid Id, [FromBody] CreatePostDTO UpdatedPost)
         {
             var post = await _postService.GetPostByIdAsync(Id);
+
+            
             if (post == null)
             {
                 return NotFound();

@@ -1,7 +1,7 @@
-﻿using SocialMedia.models.DTO.Posts;
+﻿using SocialMedia.DTO.Posts;
 using System;
 
-namespace SocialMedia.models.DTO.Users
+namespace SocialMedia.DTO.Users
 {
     public class UserResponseDto
     {

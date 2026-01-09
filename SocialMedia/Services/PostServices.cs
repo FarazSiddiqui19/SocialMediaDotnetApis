@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.DTO;
+using SocialMedia.DTO.PostReaction;
+using SocialMedia.DTO.Posts;
 using SocialMedia.mappers;
 using SocialMedia.models;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.PostReaction;
-using SocialMedia.models.DTO.Posts;
-using SocialMedia.models.DTO.Users;
+using SocialMedia.DTO.Users;
 using SocialMedia.Services.Interfaces;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 

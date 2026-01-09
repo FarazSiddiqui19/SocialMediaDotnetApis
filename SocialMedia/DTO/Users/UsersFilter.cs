@@ -1,6 +1,6 @@
 ﻿using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace SocialMedia.models.DTO.Users
+namespace SocialMedia.DTO.Users
 {
     public class UsersFilter
     {

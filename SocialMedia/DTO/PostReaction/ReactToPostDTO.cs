@@ -1,6 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using SocialMedia.models;
+using System.Text.Json.Serialization;
 
-namespace SocialMedia.models.DTO.PostReaction
+namespace SocialMedia.DTO.PostReaction
 {
     public class ReactToPostDTO
     {

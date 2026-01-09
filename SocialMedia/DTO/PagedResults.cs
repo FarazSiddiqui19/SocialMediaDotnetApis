@@ -1,4 +1,4 @@
-﻿namespace SocialMedia.models.DTO
+﻿namespace SocialMedia.DTO
 {
     public class PagedResults<T>
     {

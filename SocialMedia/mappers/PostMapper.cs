@@ -1,6 +1,6 @@
-﻿using SocialMedia.models;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.Posts;
+﻿using SocialMedia.DTO.Posts;
+using SocialMedia.models;
+using SocialMedia.DTO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 

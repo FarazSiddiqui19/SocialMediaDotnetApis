@@ -1,4 +1,4 @@
-﻿namespace SocialMedia.models.DTO.Users
+﻿namespace SocialMedia.DTO.Users
 {
     public class CreateUserDTO
     {
