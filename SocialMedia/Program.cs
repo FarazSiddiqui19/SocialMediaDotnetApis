@@ -89,6 +89,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IUsersServices, UserServices>();
 builder.Services.AddScoped<IPostsServices, PostServices>();
 builder.Services.AddScoped<ITokenGeneratorService, TokenGeneratorService>();
+builder.Services.AddScoped<IPasswordHasherService,PasswordHasherService > ();
 
 
 

@@ -49,6 +49,8 @@ namespace SocialMedia.Data
             {
                 entity.Property(e => e.Content).HasColumnType("jsonb");
             });
+
+
         }
 
     }

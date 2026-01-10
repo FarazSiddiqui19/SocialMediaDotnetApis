@@ -9,7 +9,8 @@ namespace SocialMedia.mappers
         {
             return new User
             {
-                Username = dto.Username
+                Username = dto.Username,
+                HashedPassword = dto.Password
             };
         }
 

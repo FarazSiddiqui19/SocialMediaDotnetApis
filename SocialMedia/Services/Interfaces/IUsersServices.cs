@@ -9,7 +9,7 @@ namespace SocialMedia.Services.Interfaces
         Task<UserResponseDto> CreateUserAsync(CreateUserDTO dto);
         Task<PagedResults<UserResponseDto>> GetAllUsersAsync(UsersFilter filter);
 
-        Task<UserLoginResposeDTO?> LoginAsync(Guid UserId);
+        Task<UserLoginResposeDTO?> LoginAsync(UserLoginDTO LoginRequest);
         Task<UserResponseDto?> GetUserByIdAsync(Guid id);
         Task<bool> DeleteUserAsync(Guid id);
         Task<bool> UpdateUserAsync(Guid id, CreateUserDTO dto);

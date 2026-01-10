@@ -26,6 +26,8 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> Get([FromBody] UsersFilter filter)
         {
             PagedResults<UserResponseDto> userslist = await _usersService.GetAllUsersAsync(filter);
+            
+
             return Ok(userslist);
         }
 
@@ -50,7 +52,7 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> Login([FromBody]UserLoginDTO UserLoginRequest)
         {
           
-            var user = await _usersService.LoginAsync(UserLoginRequest.UserId);
+            var user = await _usersService.LoginAsync(UserLoginRequest);
             if (user == null)
             {
                 return Unauthorized();

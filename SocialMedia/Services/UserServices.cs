@@ -12,6 +12,7 @@ using SocialMedia.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Diagnostics;
 
 namespace SocialMedia.Services
 {
@@ -20,11 +21,14 @@ namespace SocialMedia.Services
         private readonly IUserRepository  _userRepository;
         private readonly ITokenGeneratorService _tokenGeneratorService;
         private readonly IConfiguration _config;
+        private readonly IPasswordHasherService _passwordHasherService;
 
-        public UserServices(IUserRepository userRepository,IConfiguration config,ITokenGeneratorService tokenGeneratorService) {
+        public UserServices(IUserRepository userRepository,IConfiguration config,
+                            ITokenGeneratorService tokenGeneratorService,IPasswordHasherService passwordHasherService) {
             _userRepository = userRepository;
             _tokenGeneratorService = tokenGeneratorService;
             _config = config;
+            _passwordHasherService = passwordHasherService;
           
         }
 
@@ -54,12 +58,15 @@ namespace SocialMedia.Services
 
         public async Task<PagedResults<UserResponseDto>> GetAllUsersAsync(UsersFilter filter)
         {
+          
             string? Username = filter.Username;
             int page = filter.page;
             int pageSize = filter.pageSize;
             SortOrder orderby = filter.orderby;
           PagedResults<UserResponseDto> UsersList = await _userRepository
                                                     .GetAllUsersAsync(Username, pagesize:pageSize, page:page, orderby);
+
+          
 
             return UsersList;
 
@@ -83,6 +90,7 @@ namespace SocialMedia.Services
                 return false;
             }
             existingUser.Username = dto.Username;
+            existingUser.HashedPassword = _passwordHasherService.HashPassword(dto.Password);
 
             await _userRepository.UpdateUserAsync(existingUser);
 
@@ -90,11 +98,18 @@ namespace SocialMedia.Services
         }
 
 
-        public async Task<UserLoginResposeDTO?> LoginAsync(Guid UserId)
+        public async Task<UserLoginResposeDTO?> LoginAsync(UserLoginDTO LoginRequest)
         {
-            User? user = await _userRepository.GetUserByIdAsync(UserId);
+            User? user = await _userRepository.GetUserByIdAsync(LoginRequest.UserId);
             if (user == null)
                 return null;
+
+            bool verifyPassword = _passwordHasherService.VerifyPassword(LoginRequest.Password, user.HashedPassword);
+
+            if (verifyPassword == false)
+            {
+                return null;
+            }
 
             TokenDTO? jwtToken = await _tokenGeneratorService.GenerateTokenAsync(user.Id,user.Username);
 
