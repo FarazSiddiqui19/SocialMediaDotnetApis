@@ -5,12 +5,13 @@ namespace SocialMedia.mappers
 {
     public static class UserMapper
     {
-        public static User ToEntity(this CreateUserDTO dto)
+        public static User ToEntity(this CreateUserDTO dto, byte[] passwordBytes)
         {
             return new User
             {
                 Username = dto.Username,
-                HashedPassword = dto.Password
+                HashedPassword = passwordBytes,
+                Email = dto.Email,
             };
         }
 

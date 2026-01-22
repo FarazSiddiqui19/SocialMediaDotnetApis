@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data;
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialContext))]
-    partial class SocialContextModelSnapshot : ModelSnapshot
+    [Migration("20260119114714_AddedFriendRequestEntitySecondTime")]
+    partial class AddedFriendRequestEntitySecondTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,10 +27,10 @@ namespace SocialMedia.Migrations
 
             modelBuilder.Entity("SocialMedia.Models.FriendRequest", b =>
                 {
-                    b.Property<Guid>("SenderId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RecieverId")
+                    b.Property<Guid>("FriendId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("id")
@@ -36,9 +39,9 @@ namespace SocialMedia.Migrations
                     b.Property<int>("status")
                         .HasColumnType("integer");
 
-                    b.HasKey("SenderId", "RecieverId");
+                    b.HasKey("UserId", "FriendId");
 
-                    b.HasIndex("RecieverId");
+                    b.HasIndex("FriendId");
 
                     b.ToTable("FriendRequest");
                 });
@@ -118,21 +121,21 @@ namespace SocialMedia.Migrations
 
             modelBuilder.Entity("SocialMedia.Models.FriendRequest", b =>
                 {
-                    b.HasOne("SocialMedia.models.User", "Reciever")
+                    b.HasOne("SocialMedia.models.User", "Friend")
                         .WithMany()
-                        .HasForeignKey("RecieverId")
+                        .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.models.User", "Sender")
+                    b.HasOne("SocialMedia.models.User", "user")
                         .WithMany()
-                        .HasForeignKey("SenderId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Reciever");
+                    b.Navigation("Friend");
 
-                    b.Navigation("Sender");
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("SocialMedia.models.Post", b =>

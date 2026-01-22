@@ -17,5 +17,12 @@ namespace SocialMedia.Data.Repository.Interfaces
 
         Task<bool> DeleteUserAsync(User user);
 
+        Task<Guid?> GetUserByIdEmailAsync(string Email);
+
+        Task<User?> GetUserByEmailAsync(string Email);
+
+
+
+
     }
 }

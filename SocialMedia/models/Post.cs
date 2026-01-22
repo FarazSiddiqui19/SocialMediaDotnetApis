@@ -10,7 +10,7 @@ namespace SocialMedia.models
 
         [Key] public Guid Id { get; set; }
 
-        public Guid UserId { get; set; }
+        public Guid AuthorId { get; set; }
 
        public required string Title { get; set; }
 
@@ -18,9 +18,9 @@ namespace SocialMedia.models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public List<PostReaction>? Reactions { get; set; }
+        public virtual List<PostReaction>? Reactions { get; set; }
 
-        public virtual User? User { get; set; }
+        public virtual User? Author { get; set; }
 
 
 

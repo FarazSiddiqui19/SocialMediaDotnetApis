@@ -14,25 +14,26 @@ namespace SocialMedia.Data.Repository
     {
         private readonly SocialContext _context;
         private readonly DbSet<User> _Users;
-       
-        public UsersRepository(SocialContext context) {
+
+        public UsersRepository(SocialContext context)
+        {
             _context = context;
             _Users = _context.Users;
 
         }
 
-        public async Task<User?> GetUserByIdAsync(Guid userId) 
+        public async Task<User?> GetUserByIdAsync(Guid userId)
         {
 
             return await _Users.FindAsync(userId);
         }
-        public async Task AddUserAsync(User user) 
+        public async Task AddUserAsync(User user)
         {
             await _Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PagedResults<UserResponseDto>> GetAllUsersAsync(string? name ,int pagesize, int page, SortOrder order) 
+        public async Task<PagedResults<UserResponseDto>> GetAllUsersAsync(string? name, int pagesize, int page, SortOrder order)
         {
 
             IQueryable<User> QueryUsers;
@@ -46,7 +47,8 @@ namespace SocialMedia.Data.Repository
                               .Where(u => u.Username.StartsWith(name));
             }
 
-            else {
+            else
+            {
 
                 QueryUsers = _Users;
             }
@@ -98,11 +100,11 @@ namespace SocialMedia.Data.Repository
 
         }
 
-      
 
 
-        public async Task<bool> UpdateUserAsync(User user) 
-        { 
+
+        public async Task<bool> UpdateUserAsync(User user)
+        {
             _Users.Update(user);
             await _context.SaveChangesAsync();
             return true;
@@ -113,6 +115,21 @@ namespace SocialMedia.Data.Repository
             _Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<Guid?> GetUserByIdEmailAsync(string Email)
+        {
+            return await _Users.Where(u => u.Email == Email)
+                               .Select(u => u.Id)
+                               .FirstOrDefaultAsync();
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string Email)
+        {
+            return await _Users.Where(u => u.Email == Email)
+                               .FirstOrDefaultAsync();
+
+
         }
     }
 }

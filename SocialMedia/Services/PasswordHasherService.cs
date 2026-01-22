@@ -1,89 +1,108 @@
-﻿using SocialMedia.Services.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
+﻿using EllipticCurve.Utils;
 using Konscious.Security.Cryptography;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
+using SocialMedia.DTO;
+using SocialMedia.Services.Interfaces;
+using System.Data.SqlTypes;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+
 
 namespace SocialMedia.Services
 {
     public class PasswordHasherService : IPasswordHasherService
     {
-        private readonly IConfiguration _config;
-        private  int SaltSize ;
-        private  int HashSize ; // 256 bits
-        private  int DegreeOfParallelism ; // Number of threads to use
-        private  int Iterations ; // Number of iterations
-        private  int MemorySize ; // 1 GB
-        private readonly string _pepper;
-        public PasswordHasherService(IConfiguration config) 
-        {
-            _config = config;
-            SaltSize = int.Parse(_config["Hash_Config:saltSize"]);
-            HashSize = int.Parse(_config["Hash_Config:HashSize"]); 
-            DegreeOfParallelism = int.Parse(_config["Hash_Config:DegreeOfParallelism"]); 
-            Iterations = int.Parse(_config["Hash_Config:Iterations"]);
-            MemorySize = int.Parse(_config["Hash_Config:MemoryAllocation"]);
-            _pepper = _config["Hash_Config:Pepper"];
-        }
       
+        private readonly HashConfig _config;
+        static int Parallelism, Iterations, memorySize, HashSize, saltSize;
 
-        public string HashPassword(string password)
+
+
+        public PasswordHasherService(IOptions<HashConfig> options) 
         {
-            // Generate a random salt
-            byte[] salt = new byte[SaltSize];
-          
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(salt);
-            }
-
-            string pepperedPassword = password + _pepper;
-
-            // 2. Convert that combined string into bytes
+            _config = options.Value;
+            Parallelism = _config.DegreeOfParallelism;
+            Iterations = _config.Iterations;
+            memorySize = _config.MemoryAllocation;
+            saltSize = _config.SaltSize;
+            HashSize = _config.HashSize;
            
 
-            // Create hash
-            byte[] hash = HashPassword(pepperedPassword, salt);
 
-            // Combine salt and hash
-            var combinedBytes = new byte[salt.Length + hash.Length];
-            Array.Copy(salt, 0, combinedBytes, 0, salt.Length);
-            Array.Copy(hash, 0, combinedBytes, salt.Length, hash.Length);
 
-            // Convert to base64 for storage
-            return Convert.ToBase64String(combinedBytes);
         }
 
-        private byte[] HashPassword(string password, byte[] salt)
+        private static byte[] HashPass(byte[] passwordBytes, byte[] salt)
         {
-            var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))
+            using var argon2 = new Argon2id(passwordBytes)
             {
                 Salt = salt,
-                DegreeOfParallelism = DegreeOfParallelism,
+                DegreeOfParallelism = Parallelism,
                 Iterations = Iterations,
-                MemorySize = MemorySize
+                MemorySize = memorySize
             };
 
             return argon2.GetBytes(HashSize);
         }
 
-        public bool VerifyPassword(string password, string hashedPassword)
+     
+
+
+        private static byte[] hashPassUsingArgon(string password)
         {
-            // Decode the stored hash
-            byte[] combinedBytes = Convert.FromBase64String(hashedPassword);
+          
+            byte[] saltBytes = new byte[saltSize];
+            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            rng.GetBytes(saltBytes);
 
-            // Extract salt and hash
-            byte[] salt = new byte[SaltSize];
-            byte[] hash = new byte[HashSize];
-            Array.Copy(combinedBytes, 0, salt, 0, SaltSize);
-            Array.Copy(combinedBytes, SaltSize, hash, 0, HashSize);
-            string pepperedPassword = password + _pepper;
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
 
-            // Compute hash for the input password
-            byte[] newHash = HashPassword(pepperedPassword, salt);
+            byte[] HashedPass = HashPass(passwordBytes, saltBytes);
 
-            // Compare the hashes
-            return CryptographicOperations.FixedTimeEquals(hash, newHash);
+            byte[] CombinedBytes = new byte[saltSize + HashSize];
+
+            System.Buffer.BlockCopy(HashedPass, 0, CombinedBytes, 0, HashSize) ;
+
+            System.Buffer.BlockCopy(saltBytes, 0, CombinedBytes, HashSize,saltSize);
+
+            return CombinedBytes;
+
+
+        }
+
+        private static bool VerifyPass(string password, byte[] CombinedBytes)
+        {
+
+            byte[] NewPasswordBytes = Encoding.UTF8.GetBytes(password);
+            byte[] StoredPasswordBytes = CombinedBytes.Take(HashSize).ToArray();
+            byte[] SaltBytes = CombinedBytes.Skip(HashSize).ToArray();
+
+            byte[] NewPassHashedBytes = HashPass(NewPasswordBytes, SaltBytes);
+
+            return CryptographicOperations.FixedTimeEquals(StoredPasswordBytes, NewPassHashedBytes);
+        }
+
+        public byte[] HashPassword(string password)
+        {
+
+            //byte[] pass = Encoding.UTF8.GetBytes(password);
+            //byte[] hash = MD5.HashData(pass);
+            //return hash;
+
+            return hashPassUsingArgon(password);
+
+            
+        }
+
+       
+        public bool VerifyPassword(string password, byte[] hashedPassword)
+        {
+            //byte[] newHash = HashPassword(password);
+            //return CryptographicOperations.FixedTimeEquals(hashedPassword, newHash);
+
+            return VerifyPass(password, hashedPassword);    
         }
     }
 }

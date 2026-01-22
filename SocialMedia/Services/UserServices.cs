@@ -22,25 +22,35 @@ namespace SocialMedia.Services
         private readonly ITokenGeneratorService _tokenGeneratorService;
         private readonly IConfiguration _config;
         private readonly IPasswordHasherService _passwordHasherService;
+        private readonly IEmailVerificationService _emailVerificationService;
 
         public UserServices(IUserRepository userRepository,IConfiguration config,
-                            ITokenGeneratorService tokenGeneratorService,IPasswordHasherService passwordHasherService) {
+                            ITokenGeneratorService tokenGeneratorService,
+                            IPasswordHasherService passwordHasherService,
+                            IEmailVerificationService emailVerificationService) {
             _userRepository = userRepository;
             _tokenGeneratorService = tokenGeneratorService;
             _config = config;
             _passwordHasherService = passwordHasherService;
+            _emailVerificationService = emailVerificationService;
           
         }
 
        
         public async Task<UserResponseDto> CreateUserAsync(CreateUserDTO dto)
         {
-            User user = dto.ToEntity();
+           
+
+           byte[] hashedPassword = _passwordHasherService.HashPassword(dto.Password);
+            
+            User user = dto.ToEntity(hashedPassword);
 
             await _userRepository.AddUserAsync(user);
             return user.ToDTO();
 
         }
+
+       
 
         public async Task<bool> DeleteUserAsync(Guid id)
         {
@@ -72,6 +82,16 @@ namespace SocialMedia.Services
 
         }
 
+        public async Task<Guid?> GetUserIdByEmailAsync(string? email)
+        {
+            Guid? userId = await _userRepository.GetUserByIdEmailAsync(email);
+            if (userId == null)
+                return null;
+            return userId;
+        }
+
+
+
         public async Task<UserResponseDto?> GetUserByIdAsync(Guid id)
         {
             User? user  = await _userRepository.GetUserByIdAsync(id);
@@ -90,6 +110,8 @@ namespace SocialMedia.Services
                 return false;
             }
             existingUser.Username = dto.Username;
+          
+
             existingUser.HashedPassword = _passwordHasherService.HashPassword(dto.Password);
 
             await _userRepository.UpdateUserAsync(existingUser);
@@ -100,10 +122,10 @@ namespace SocialMedia.Services
 
         public async Task<UserLoginResposeDTO?> LoginAsync(UserLoginDTO LoginRequest)
         {
-            User? user = await _userRepository.GetUserByIdAsync(LoginRequest.UserId);
+            User? user = await _userRepository.GetUserByEmailAsync(LoginRequest.Email);
             if (user == null)
                 return null;
-
+          
             bool verifyPassword = _passwordHasherService.VerifyPassword(LoginRequest.Password, user.HashedPassword);
 
             if (verifyPassword == false)

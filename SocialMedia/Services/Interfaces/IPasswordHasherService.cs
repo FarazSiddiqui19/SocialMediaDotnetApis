@@ -2,7 +2,9 @@
 {
     public interface IPasswordHasherService
     {
-        string HashPassword(string password);
-        bool VerifyPassword(string password, string hashedPassword);
+        byte[] HashPassword(string password);
+        bool VerifyPassword(string password, byte[] hashedPassword);
+
+      
     }
 }

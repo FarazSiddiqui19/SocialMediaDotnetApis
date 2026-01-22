@@ -9,12 +9,14 @@ namespace SocialMedia.Data.Repository.Interfaces
     {
    
         Task<Post?> GetPostByIdAsync(Guid postId);
-        Task<PagedResults<PostResponseDTO>> GetAllPosts(PostsFilterDTO filter);
+        Task<PagedResults<PostResponseDTO>> GetAllPosts(PostsFilterDTO filter,Guid? LoggedInUser);
         Task AddPostAsync(Post post);
         Task<bool> UpdatePostAsync(Post posts);
         Task<bool> DeletePostAsync(Post post);
 
-        Task<bool> TestReaction(ReactToPostDTO Reaction);
+      
+
+
 
 
     }

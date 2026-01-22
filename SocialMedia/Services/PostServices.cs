@@ -7,10 +7,11 @@ using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.DTO;
 using SocialMedia.DTO.PostReaction;
 using SocialMedia.DTO.Posts;
+using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
-using SocialMedia.DTO.Users;
 using SocialMedia.Services.Interfaces;
+using System.Security.Claims;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SocialMedia.Services
@@ -31,17 +32,19 @@ namespace SocialMedia.Services
         }
 
 
-        public async Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto)
+        public async Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto,Guid UserId)
         {
 
 
-            Post? post = dto.ToEntity();
+            Post? post = dto.ToEntity(UserId);
             await _postRepository.AddPostAsync(post);
 
 
-            return post.ToDTO();
+            return post.ToDTO(UserId);
 
         }
+
+      
 
         public async Task<bool> DeletePostAsync(Guid id)
         {
@@ -56,10 +59,10 @@ namespace SocialMedia.Services
         }
 
         public async Task<PagedResults<PostResponseDTO>> GetAllPostsAsync(PostsFilterDTO filters,
-                                                                        Guid? UserId)
+                                                                        Guid? LoggedInUser)
         {
 
-            PagedResults<PostResponseDTO> postslist = await _postRepository.GetAllPosts(filters);
+            PagedResults<PostResponseDTO> postslist = await _postRepository.GetAllPosts(filters,LoggedInUser);
 
             if (postslist.TotalCount == 0)
             {
@@ -92,7 +95,7 @@ namespace SocialMedia.Services
 
 
 
-            return post.ToDTO();
+            return post.ToDTO(Guid.Empty);
         }
 
 
@@ -110,13 +113,13 @@ namespace SocialMedia.Services
             return await _postRepository.UpdatePostAsync(existingPost);
         }
 
-        public async Task<bool> PostReaction(ReactToPostDTO Reaction)
+        public async Task<bool> PostReaction(ReactToPostDTO Reaction,Guid UserId)
         {
-            PostReaction? existingReaction = await _postReactionRepository.GetUserReactionToPostAsync(Reaction.PostId, Reaction.UserId);
-            var testing = await _postRepository.TestReaction(Reaction);
+            PostReaction? existingReaction = await _postReactionRepository.GetUserReactionToPostAsync(Reaction.PostId, UserId);
+           
             if (existingReaction == null)
             {
-                PostReaction newReaction = Reaction.ToEntity();
+                PostReaction newReaction = Reaction.ToEntity(UserId);
                 await _postReactionRepository.AddAsync(newReaction);
 
             }
@@ -139,6 +142,20 @@ namespace SocialMedia.Services
 
             return true;
 
+
+        }
+
+
+        public async Task<string> VerifyUser(ClaimsPrincipal User)
+        {
+            if (User.Claims.Any(c => c.Type == ClaimTypes.NameIdentifier))
+            {
+                return User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+             
+            }
+
+
+            return string.Empty;
 
         }
 

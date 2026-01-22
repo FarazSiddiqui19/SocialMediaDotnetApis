@@ -6,13 +6,13 @@ namespace SocialMedia.mappers
     public static class PostReactionMapper
     {
 
-        public static PostReaction ToEntity(this ReactToPostDTO dto)
+        public static PostReaction ToEntity(this ReactToPostDTO dto,Guid UserId)
         { 
         
             return new PostReaction
             {
                 PostId = dto.PostId,
-                UserId = dto.UserId,
+                UserId = UserId,
                 Type = dto.Type,
             };
         }
@@ -22,7 +22,6 @@ namespace SocialMedia.mappers
             return new ReactToPostDTO
             {
                 PostId = reaction.PostId,
-                UserId = reaction.UserId,
                 Type = reaction.Type,
             };
         }

@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using SocialMedia.DTO;
 using SocialMedia.DTO.Users;
 using SocialMedia.models;
 using SocialMedia.Services.Interfaces;
@@ -11,11 +13,12 @@ namespace SocialMedia.Services
     public class TokenGeneratorService : ITokenGeneratorService
     {
 
-        private readonly IConfiguration _config;
+       
+        private readonly JWTConfig _jwtConfig;
 
-        public TokenGeneratorService(IConfiguration config)
+        public TokenGeneratorService(IOptions<JWTConfig> JwtOptions)
         {
-            _config = config;
+            _jwtConfig = JwtOptions.Value;
     }
     
         public async Task<TokenDTO> GenerateTokenAsync(Guid userId, string Username) 
@@ -30,13 +33,13 @@ namespace SocialMedia.Services
 
             var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(
-                _config["JwtConfig:Key"]!
+                _jwtConfig.key
             ));
 
-            string issuer = _config["JwtConfig:Issuer"];
-            string audience = _config["JwtConfig:Audience"];
+            string issuer = _jwtConfig.Issuer;
+            string audience = _jwtConfig.Audience;
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            int ExpiryInMinutes = int.Parse(_config["JwtConfig:DurationInMinutes"]);
+            int ExpiryInMinutes = _jwtConfig.DurationInMinutes;
             DateTime ExpiryDuration = DateTime.UtcNow.AddMinutes(ExpiryInMinutes);
 
             JwtSecurityToken token = new JwtSecurityToken(

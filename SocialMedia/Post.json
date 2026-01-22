@@ -1,0 +1,75 @@
+[
+  {
+    "title": "Scalable System Design Principles",
+    "content": {
+      "meta": { "wordCount": 100 },
+      "markdown": {
+        "content": "Scalable systems handle growth without requiring complete architectural rewrites.\nHorizontal scaling is generally preferred over vertical scaling approaches.\nStateless services allow traffic to be distributed across multiple instances.\nCaching reduces load on databases and improves response times.\nAsynchronous processing helps systems remain responsive under heavy workloads.\nMessage queues decouple services and improve fault tolerance.\nDatabase sharding distributes data across multiple nodes efficiently.\nObservability helps teams understand bottlenecks before failures occur.\nScalability requires planning but should avoid unnecessary complexity early.\nSimple scalable designs outperform complex premature optimizations long term."
+      }
+    }
+  },
+  {
+    "title": "Microservice Architecture Explained",
+    "content": {
+      "meta": { "wordCount": 144 },
+      "markdown": {
+        "content": "Microservice architecture splits applications into independent services deployed and scaled separately easily.\nEach service owns its data logic and communicates through well defined APIs.\nLoose coupling allows teams to develop deploy and test services independently faster.\nSmaller codebases improve readability maintainability and onboarding for new developers across teams.\nService boundaries should reflect business capabilities rather than technical layers strictly always.\nInter service communication often uses HTTP messaging or event driven approaches patterns.\nCentralized observability is essential for tracing requests across distributed services reliably consistently.\nFailure isolation ensures one service outage does not cascade system wide failures.\nAutomated deployment pipelines enable frequent releases with reduced operational risk through automation.\nContainerization and orchestration platforms simplify scaling networking and service discovery across environments.\nStrong governance prevents duplicated functionality inconsistent standards and unmanaged dependencies across services.\nSuccessful microservices demand cultural alignment ownership responsibility and continuous communication between teams."
+      }
+    }
+  },
+  {
+    "title": "Event Driven Architecture Overview",
+    "content": {
+      "meta": { "wordCount": 75 },
+      "markdown": {
+        "content": "Event driven architecture reacts to changes by producing and consuming events asynchronously across distributed systems\nIt decouples services allowing independent scaling resilience and flexible evolution over time for complex platforms\nProducers emit events without knowing consumers improving loose coupling and fault tolerance within modern systems\nMessage brokers handle delivery ordering retries enabling reliable asynchronous communication patterns at large scale efficiently\nEvent driven systems support real time processing analytics automation and responsive user experiences today globally"
+      }
+    }
+  },
+  {
+    "title": "Caching Strategies in Distributed Systems",
+    "content": {
+      "meta": { "wordCount": 60 },
+      "markdown": {
+        "content": "Caching improves performance by storing frequently accessed data closer to consumers\nDistributed caches reduce database load and improve response latency significantly\nCommon strategies include read through write through and cache aside patterns\nCache invalidation must be handled carefully to avoid stale or inconsistent data\nEffective caching balances freshness memory usage and system scalability"
+      }
+    }
+  },
+  {
+    "title": "Database Transactions and Consistency",
+    "content": {
+      "meta": { "wordCount": 90 },
+      "markdown": {
+        "content": "Database transactions ensure data consistency across multiple operations within systems\nACID properties guarantee atomicity consistency isolation and durability during execution\nTransactions prevent partial updates when failures occur mid operation\nIsolation levels control visibility of uncommitted changes between concurrent transactions\nChoosing correct isolation balances performance and correctness under load\nDistributed transactions introduce complexity and are often avoided using eventual consistency\nUnderstanding transaction boundaries is critical for reliable backend systems"
+      }
+    }
+  },
+  {
+    "title": "Asynchronous Programming Patterns",
+    "content": {
+      "meta": { "wordCount": 110 },
+      "markdown": {
+        "content": "Asynchronous programming improves responsiveness by allowing non blocking operations\nThreads are freed while waiting for input output operations to complete\nPromises futures and async await simplify asynchronous control flow readability\nEvent loops manage execution order efficiently in single threaded environments\nAsync code scales better under high concurrency workloads\nImproper async handling can cause race conditions deadlocks and resource leaks\nClear error handling is essential when working with asynchronous logic\nBackpressure mechanisms prevent overwhelming downstream services during spikes\nAsync patterns are fundamental for modern web and cloud applications"
+      }
+    }
+  },
+  {
+    "title": "Observability and Monitoring Systems",
+    "content": {
+      "meta": { "wordCount": 120 },
+      "markdown": {
+        "content": "Observability provides deep insight into system behavior during runtime conditions\nLogs metrics and traces form the foundation of effective monitoring strategies\nMetrics reveal trends performance degradation and resource utilization patterns\nLogs capture detailed context for debugging unexpected system behavior\nDistributed tracing follows requests across multiple services and dependencies\nAlerting helps teams respond quickly to failures before users are impacted\nDashboards visualize system health and key performance indicators clearly\nGood observability reduces mean time to detection and recovery significantly\nMonitoring must evolve alongside system complexity and scale\nProactive observability improves reliability confidence and operational excellence overall"
+      }
+    }
+  },
+  {
+    "title": "Containerization and Deployment Pipelines",
+    "content": {
+      "meta": { "wordCount": 140 },
+      "markdown": {
+        "content": "Containerization packages applications with dependencies ensuring consistent runtime environments everywhere\nContainers eliminate configuration drift between development testing and production systems\nDocker images provide lightweight isolated execution units for applications\nOrchestration platforms manage scheduling scaling networking and health checks automatically\nCI pipelines automate building testing and validating container images\nCD pipelines handle safe deployments rollbacks and environment promotion workflows\nInfrastructure as code enables reproducible and version controlled deployments\nBlue green and canary deployments reduce risk during production releases\nAutomated pipelines increase release frequency while maintaining system stability\nStrong deployment practices improve reliability velocity and developer productivity\nModern platforms depend heavily on automated container based delivery models"
+      }
+    }
+  }
+]
+
