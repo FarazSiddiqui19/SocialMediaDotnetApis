@@ -1,15 +1,17 @@
-﻿using SocialMedia.models;
-using SocialMedia.models.DTO.Users;
+﻿using SocialMedia.DTO.Users;
+using SocialMedia.models;
 
 namespace SocialMedia.mappers
 {
     public static class UserMapper
     {
-        public static User ToEntity(this CreateUserDTO dto)
+        public static User ToEntity(this CreateUserDTO dto, byte[] passwordBytes)
         {
             return new User
             {
-                Username = dto.Username
+                Username = dto.Username,
+                HashedPassword = passwordBytes,
+                Email = dto.Email,
             };
         }
 

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SocialMedia.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SocialMedia.models
 {
@@ -8,7 +10,18 @@ namespace SocialMedia.models
 
         public required string Username { get; set; }
 
+        
+        public  required byte[] HashedPassword { get; set; }
+
+        public  required string Email { get; set; }
+
+      
         public virtual List<Post>? Posts { get; set; }
+
+        [NotMapped]
+        public virtual List<FriendRequest>? Requests { get; set; }
+        [NotMapped]
+        public virtual List<User>? Friends { get; set; }
 
     }
 }

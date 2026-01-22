@@ -1,7 +1,7 @@
 ﻿using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using SocialMedia.DTO;
+using SocialMedia.DTO.Users;
 using SocialMedia.models;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.Users;
 namespace SocialMedia.Data.Repository.Interfaces
 {
     public interface IUserRepository
@@ -16,6 +16,13 @@ namespace SocialMedia.Data.Repository.Interfaces
         Task<bool> UpdateUserAsync(User user);
 
         Task<bool> DeleteUserAsync(User user);
+
+        Task<Guid?> GetUserByIdEmailAsync(string Email);
+
+        Task<User?> GetUserByEmailAsync(string Email);
+
+
+
 
     }
 }

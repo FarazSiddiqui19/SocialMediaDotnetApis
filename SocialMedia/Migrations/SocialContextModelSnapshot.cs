@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data;
-using SocialMedia.models;
 
 #nullable disable
 
@@ -23,15 +22,35 @@ namespace SocialMedia.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SocialMedia.Models.FriendRequest", b =>
+                {
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RecieverId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SenderId", "RecieverId");
+
+                    b.HasIndex("RecieverId");
+
+                    b.ToTable("FriendRequest");
+                });
+
             modelBuilder.Entity("SocialMedia.models.Post", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<PostContent>("Content")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -40,35 +59,31 @@ namespace SocialMedia.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("AuthorId");
 
                     b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("SocialMedia.models.PostReaction", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("PostId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
+                    b.HasKey("PostId", "UserId");
 
                     b.HasIndex("UserId");
 
@@ -84,6 +99,14 @@ namespace SocialMedia.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("HashedPassword")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
@@ -93,15 +116,86 @@ namespace SocialMedia.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SocialMedia.Models.FriendRequest", b =>
+                {
+                    b.HasOne("SocialMedia.models.User", "Reciever")
+                        .WithMany()
+                        .HasForeignKey("RecieverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Reciever");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("SocialMedia.models.Post", b =>
                 {
-                    b.HasOne("SocialMedia.models.User", "User")
+                    b.HasOne("SocialMedia.models.User", "Author")
                         .WithMany("Posts")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.OwnsOne("SocialMedia.models.PostContent", "Content", b1 =>
+                        {
+                            b1.Property<Guid>("PostId");
+
+                            b1.HasKey("PostId");
+
+                            b1.ToTable("Posts");
+
+                            b1.ToJson("Content");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PostId");
+
+                            b1.OwnsOne("SocialMedia.models.Markdown", "markdown", b2 =>
+                                {
+                                    b2.Property<Guid>("PostContentPostId");
+
+                                    b2.Property<string>("content")
+                                        .IsRequired();
+
+                                    b2.HasKey("PostContentPostId");
+
+                                    b2.ToTable("Posts");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PostContentPostId");
+                                });
+
+                            b1.OwnsOne("SocialMedia.models.Meta", "meta", b2 =>
+                                {
+                                    b2.Property<Guid>("PostContentPostId");
+
+                                    b2.Property<int>("wordCount");
+
+                                    b2.HasKey("PostContentPostId");
+
+                                    b2.ToTable("Posts");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PostContentPostId");
+                                });
+
+                            b1.Navigation("markdown")
+                                .IsRequired();
+
+                            b1.Navigation("meta")
+                                .IsRequired();
+                        });
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Content")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SocialMedia.models.PostReaction", b =>

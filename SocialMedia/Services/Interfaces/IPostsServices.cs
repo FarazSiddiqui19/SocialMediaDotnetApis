@@ -1,12 +1,13 @@
-﻿using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.PostReaction;
-using SocialMedia.models.DTO.Posts;
+﻿using SocialMedia.DTO;
+using SocialMedia.DTO.PostReaction;
+using SocialMedia.DTO.Posts;
+using System.Security.Claims;
 
 namespace SocialMedia.Services.Interfaces
 {
     public interface IPostsServices
     {
-        Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto);
+        Task<PostResponseDTO> CreatePostAsync(CreatePostDTO dto,Guid UserId);
 
         Task<PagedResults<PostResponseDTO>> GetAllPostsAsync(PostsFilterDTO filters,
                                                                           Guid? UserId);
@@ -16,7 +17,11 @@ namespace SocialMedia.Services.Interfaces
 
         Task<bool> UpdatePostAsync(Guid id, CreatePostDTO dto);
 
-        Task<bool> PostReaction(ReactToPostDTO Reaction);
+        Task<bool> PostReaction(ReactToPostDTO Reaction,Guid UserId);
+
+        Task<string> VerifyUser(ClaimsPrincipal User);
+
+     
 
 
     }

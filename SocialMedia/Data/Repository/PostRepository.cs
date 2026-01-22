@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.DTO;
+using SocialMedia.DTO.PostReaction;
+using SocialMedia.DTO.Posts;
 using SocialMedia.mappers;
 using SocialMedia.models;
-using SocialMedia.models.DTO;
-using SocialMedia.models.DTO.PostReaction;
-using SocialMedia.models.DTO.Posts;
 
 namespace SocialMedia.Data.Repository
 {
@@ -22,20 +22,19 @@ namespace SocialMedia.Data.Repository
         }
         public async Task AddPostAsync(Post CreatePost)
         {
-            bool UserExists = _Posts.Include(p => p.User)
-                                    .Where(p=>p.UserId == CreatePost.UserId)
-                                    .FirstOrDefault()!=null;
+           
+            bool authorExists = await _context.Users.AnyAsync(u => u.Id == CreatePost.AuthorId);
 
-            if (UserExists == true) {
+            if (authorExists)
+            {
                 _Posts.Add(CreatePost);
                 await _context.SaveChangesAsync();
             }
-
-            else { 
-                throw new UnauthorizedAccessException("User does not exist.");
-
+            else
+            {
+             
+                throw new InvalidOperationException("Cannot create a post for a non-existent user.");
             }
-
         }
 
         public async Task<bool> DeletePostAsync(Post posts)
@@ -63,89 +62,71 @@ namespace SocialMedia.Data.Repository
        
 
 
-        public async Task<PagedResults<PostResponseDTO>> GetAllPosts(PostsFilterDTO filter)
+        public async Task<PagedResults<PostResponseDTO>> GetAllPosts(PostsFilterDTO filter, Guid? LoggedInUser)
         {
-            IQueryable<Post> query = _Posts
-                                        .Include(p => p.Reactions);
-            Guid? UserId = filter.UserId;
-            DateTime? fromDate = filter.FromDate;
-            DateTime? toDate = filter.ToDate;
-            string? title = filter.Title;
-            SortByParam sortby = filter.sortby;
-            SortOrder orderby = filter.orderby;
-            int page = filter.page;
-            int pagesize = filter.pagesize;
+            IQueryable<Post> query = _Posts.Include(p => p.Reactions).AsSplitQuery();
 
-
-            if (UserId.HasValue)
+            
+            if (filter.UserId.HasValue)
             {
-                query = query.Where(p => p.UserId == UserId.Value);
+                query = query.Where(p => p.AuthorId == filter.UserId.Value);
             }
 
-            if (fromDate.HasValue)
+           
+            if (filter.FromDate.HasValue && filter.ToDate.HasValue)
             {
-                if (!toDate.HasValue) {
-                    toDate = fromDate.Value.AddMonths(1);
-                    query = query.Where(p => p.CreatedAt >= fromDate.Value && p.CreatedAt <= toDate.Value);
-                }
-
-                else
-                    query = query.Where(p => p.CreatedAt >= fromDate.Value);
+                query = query.Where(p => p.CreatedAt >= filter.FromDate.Value && p.CreatedAt <= filter.ToDate.Value);
+            }
+            else if (filter.FromDate.HasValue)
+            {
+                
+                query = query.Where(p => p.CreatedAt >= filter.FromDate.Value);
+            }
+            else if (filter.ToDate.HasValue)
+            {
+                
+                query = query.Where(p => p.CreatedAt <= filter.ToDate.Value);
             }
 
-            if (toDate.HasValue)
+           
+            if (!string.IsNullOrWhiteSpace(filter.Title))
             {
-                if (!fromDate.HasValue) {
-                    fromDate = toDate.Value.AddMonths(-1);
-                    query = query.Where(p => p.CreatedAt >= fromDate.Value && p.CreatedAt <= toDate.Value);
-                }
-                else
-                    query = query.Where(p => p.CreatedAt <= toDate.Value);
+                query = query.Where(p => p.Title.StartsWith(filter.Title));
             }
 
-            if (!string.IsNullOrWhiteSpace(title))
+            int totalCount = await query.CountAsync();
+
+         
+            switch (filter.sortby, filter.orderby)
             {
-                query = query.Where(p => p.Title.StartsWith(title));
-            }
-
-            int TotalCount = await query.CountAsync();  
-
-
-            switch (sortby,orderby) {
-                case (SortByParam.CreatedAt,SortOrder.Ascending):
-                    query = query.OrderBy(p=>p.CreatedAt); 
-                    break;
-
-                case (SortByParam.CreatedAt,SortOrder.Descending):
+                case (SortByParam.CreatedAt, SortOrder.Ascending):
                     query = query.OrderBy(p => p.CreatedAt);
-                    break;  
-                    
-                case (SortByParam.Title,SortOrder.Ascending):
-                    query = query.OrderBy(p => p.Title);
                     break;
-
-                case (SortByParam.Title,SortOrder.Descending):
-                    query = query.OrderByDescending(p => p.Title);
-                    break;
-
-                default:
+                case (SortByParam.CreatedAt, SortOrder.Descending):
                     query = query.OrderByDescending(p => p.CreatedAt);
                     break;
+                case (SortByParam.Title, SortOrder.Ascending):
+                    query = query.OrderBy(p => p.Title);
+                    break;
+                case (SortByParam.Title, SortOrder.Descending):
+                    query = query.OrderByDescending(p => p.Title);
+                    break;
+                default:
+                    query = query.OrderByDescending(p => p.CreatedAt); 
+                    break;
             }
 
-
-
-            List<PostResponseDTO>? QueryResult = await query
-                        .Skip((page - 1) * pagesize)
-                        .Take(pagesize)
-                         .Select(p => p.ToDTO())
-                        .ToListAsync();
-
+            
+            List<PostResponseDTO> queryResult = await query
+                .Skip((filter.page - 1) * filter.pagesize)
+                .Take(filter.pagesize)
+                .Select(p => p.ToDTO(LoggedInUser))
+                .ToListAsync();
 
             return new PagedResults<PostResponseDTO>
-                {
-                Results = QueryResult,
-                TotalCount = TotalCount 
+            {
+                Results = queryResult,
+                TotalCount = totalCount
             };
         }
 
@@ -158,25 +139,9 @@ namespace SocialMedia.Data.Repository
         }
 
 
-        public async Task<bool> TestReaction(ReactToPostDTO Reaction)
-        {
-            var postwithreactions = _Posts
-                                        .Where(p => p.Id == Reaction.PostId)
-                                        .Include(p => p.Reactions);
-            
-                                     
-
-            PostReaction? existingReaction = postwithreactions
-                                        .SelectMany(p => p.Reactions)
-                                        .Where(r => r.UserId == Reaction.UserId)
-                                        .FirstOrDefault();
-
-
-            return true;
-
-        }
-      
 
        
+
+
     }
 }

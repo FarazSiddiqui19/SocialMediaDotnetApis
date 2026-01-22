@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SocialMedia.models;
+using SocialMedia.Data.Config;
+using SocialMedia.Models;
 
 namespace SocialMedia.Data
 {
@@ -13,42 +16,20 @@ namespace SocialMedia.Data
 
         public DbSet<PostReaction> PostReactions { get; set; }
 
+        public DbSet<FriendRequest> FriendRequest { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Post>(entity =>
-            {
-                entity.HasOne(p => p.User).WithMany(a => a.Posts)
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-            });
+            //modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly,
+            //                                            t=>t.Namespace== "SocialMedia.Data.Config");
+            modelBuilder.ApplyConfiguration(new PostConfig());
+            modelBuilder.ApplyConfiguration(new PostReactionConfig());
+            modelBuilder.ApplyConfiguration(new UserConfig());
+            modelBuilder.ApplyConfiguration(new FriendRequestConfig());
 
-            modelBuilder.Entity<PostReaction>(entity =>
-            {
-                entity.HasKey(r => r.Id);
+            
 
-
-                entity.HasIndex(r => new { r.PostId, r.UserId })
-                      .IsUnique();
-
-
-              entity.HasOne<Post>()
-                  .WithMany(p => p.Reactions)
-                  .HasForeignKey(r => r.PostId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-
-                entity.HasOne<User>()
-                  .WithMany()
-                  .HasForeignKey(r => r.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
-            });
-
-
-
-            modelBuilder.Entity<Post>(entity =>
-            {
-                entity.Property(e => e.Content).HasColumnType("jsonb");
-            });
         }
 
     }

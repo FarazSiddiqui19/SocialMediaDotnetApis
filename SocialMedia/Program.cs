@@ -1,19 +1,21 @@
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Npgsql;
 using SocialMedia.Data;
 using SocialMedia.Data.Repository;
 using SocialMedia.Data.Repository.Interfaces;
+using SocialMedia.DTO;
 using SocialMedia.Services;
 using SocialMedia.Services.Interfaces;
+using System.Text;
 using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 
 builder.Services.AddControllers().AddJsonOptions(
         Options => { 
@@ -29,18 +31,9 @@ builder.Services.AddControllers().AddJsonOptions(
 builder.Services.AddOpenApi();
 
 
-builder.Services.AddDbContext<SocialMedia.Data.SocialContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDbContext<SocialContext>(options =>
-{
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
-        {
-            
-        });
-});
+
+
 
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -49,26 +42,83 @@ var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetCon
 
 builder.Services.AddDbContext<SocialContext>(options => options.UseNpgsql(dataSourceBuilder));
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
+            ValidAudience = builder.Configuration["JwtConfig:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"])
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header
+    });
+
+    options.AddSecurityRequirement(doc =>
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecuritySchemeReference("Bearer", doc, null),
+                new List<string>()
+            }
+        });
+});
+
 
 
 builder.Services.AddScoped<IUsersServices, UserServices>();
 builder.Services.AddScoped<IPostsServices, PostServices>();
-builder.Services.AddScoped<IPostReactionService, PostReactionService>();
+builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
+builder.Services.AddScoped<ITokenGeneratorService, TokenGeneratorService>();
+builder.Services.AddScoped<IPasswordHasherService,PasswordHasherService > ();
+
 
 
 builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostReactionRepository, PostReactionRepository>();
+builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 
+builder.Services.Configure<HashConfig>(
+    builder.Configuration.GetSection("Hash_Config"));
+
+builder.Services.Configure<JWTConfig>(
+    builder.Configuration.GetSection("JwtConfig")
+);
+
+builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+
+builder.Services.AddHttpClient("EmailVerify", client =>
+{
+    client.BaseAddress = new Uri("https://rapid-email-verifier.fly.dev/api/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -77,6 +127,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
