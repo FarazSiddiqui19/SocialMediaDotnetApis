@@ -4,25 +4,14 @@ using SocialMedia.DTO.Users;
 using SocialMedia.models;
 namespace SocialMedia.Data.Repository.Interfaces
 {
-    public interface IUserRepository
+    public interface IUserRepository : IRepository<User>
     {
        
-
-        Task<User?> GetUserByIdAsync(Guid userId);
-
         Task<PagedResults<UserResponseDto>> GetAllUsersAsync(string? name, int pagesize, int page, SortOrder order);
-        Task AddUserAsync(User user);
-
-        Task<bool> UpdateUserAsync(User user);
-
-        Task<bool> DeleteUserAsync(User user);
-
+  
         Task<Guid?> GetUserByIdEmailAsync(string Email);
 
         Task<User?> GetUserByEmailAsync(string Email);
-
-
-
 
     }
 }

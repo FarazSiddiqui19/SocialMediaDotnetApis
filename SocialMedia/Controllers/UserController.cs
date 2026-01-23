@@ -6,7 +6,7 @@ using SocialMedia.DTO.Users;
 using SocialMedia.Models;
 using SocialMedia.Services.Interfaces;
 using System.Security.Claims;
-using System.Threading.Tasks;
+
 
 namespace SocialMedia.Controllers
 {
@@ -149,7 +149,7 @@ namespace SocialMedia.Controllers
         private Guid? GetCurrentUserId()
         {
             Claim? userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value,out var userId))
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value,out Guid userId))
             {
                 
                 return null;

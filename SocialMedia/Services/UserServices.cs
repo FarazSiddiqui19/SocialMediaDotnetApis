@@ -1,18 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.DTO;
 using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
-using SocialMedia.DTO.Posts;
 using SocialMedia.Services.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Diagnostics;
 
 namespace SocialMedia.Services
 {
@@ -45,7 +38,7 @@ namespace SocialMedia.Services
             
             User user = dto.ToEntity(hashedPassword);
 
-            await _userRepository.AddUserAsync(user);
+            await _userRepository.AddAsync(user);
             return user.ToDTO();
 
         }
@@ -55,14 +48,14 @@ namespace SocialMedia.Services
         public async Task<bool> DeleteUserAsync(Guid id)
         {
             
-            User? user = await _userRepository.GetUserByIdAsync(id);
+            User? user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
             {
                 return false;
             }
 
-            await _userRepository.DeleteUserAsync(user);
+            await _userRepository.DeleteAsync(user);
             return true;
         }
 
@@ -94,7 +87,7 @@ namespace SocialMedia.Services
 
         public async Task<UserResponseDto?> GetUserByIdAsync(Guid id)
         {
-            User? user  = await _userRepository.GetUserByIdAsync(id);
+            User? user  = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
                 return null;
@@ -104,7 +97,7 @@ namespace SocialMedia.Services
 
         public async Task<bool> UpdateUserAsync(Guid id, CreateUserDTO dto)
         {
-            User? existingUser = await _userRepository.GetUserByIdAsync(id);
+            User? existingUser = await _userRepository.GetByIdAsync(id);
             if (existingUser == null)
             {
                 return false;
@@ -114,7 +107,7 @@ namespace SocialMedia.Services
 
             existingUser.HashedPassword = _passwordHasherService.HashPassword(dto.Password);
 
-            await _userRepository.UpdateUserAsync(existingUser);
+            await _userRepository.UpdateAsync(existingUser);
 
             return true;
         }

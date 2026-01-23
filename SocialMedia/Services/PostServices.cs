@@ -1,18 +1,12 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data.Repository.Interfaces;
 using SocialMedia.DTO;
 using SocialMedia.DTO.PostReaction;
 using SocialMedia.DTO.Posts;
-using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
 using SocialMedia.Services.Interfaces;
 using System.Security.Claims;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SocialMedia.Services
 {
@@ -37,7 +31,7 @@ namespace SocialMedia.Services
 
 
             Post? post = dto.ToEntity(UserId);
-            await _postRepository.AddPostAsync(post);
+            await _postRepository.AddAsync(post);
 
 
             return post.ToDTO(UserId);
@@ -48,14 +42,15 @@ namespace SocialMedia.Services
 
         public async Task<bool> DeletePostAsync(Guid id)
         {
-            Post? post = await _postRepository.GetPostByIdAsync(id);
+            Post? post = await _postRepository.GetByIdAsync(id);
 
             if (post == null)
             {
                 return false;
             }
 
-            return await _postRepository.DeletePostAsync(post);
+            await _postRepository.DeleteAsync(post);
+            return true;
         }
 
         public async Task<PagedResults<PostResponseDTO>> GetAllPostsAsync(PostsFilterDTO filters,
@@ -84,7 +79,7 @@ namespace SocialMedia.Services
 
         public async Task<PostResponseDTO?> GetPostByIdAsync(Guid id)
         {
-            Post? post = await _postRepository.GetPostByIdAsync(id);
+            Post? post = await _postRepository.GetByIdAsync(id);
 
             if (post == null)
             {
@@ -102,7 +97,7 @@ namespace SocialMedia.Services
 
         public async Task<bool> UpdatePostAsync(Guid id, CreatePostDTO UpdatedPost)
         {
-            Post? existingPost = await _postRepository.GetPostByIdAsync(id);
+            Post? existingPost = await _postRepository.GetByIdAsync(id);
             if (existingPost == null)
             {
                 return false;
@@ -110,7 +105,8 @@ namespace SocialMedia.Services
 
             existingPost.Title = UpdatedPost.Title;
             existingPost.Content = UpdatedPost.Content;
-            return await _postRepository.UpdatePostAsync(existingPost);
+            await _postRepository.UpdateAsync(existingPost);
+            return true;
         }
 
         public async Task<bool> PostReaction(ReactToPostDTO Reaction,Guid UserId)

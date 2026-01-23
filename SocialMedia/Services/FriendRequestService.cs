@@ -35,7 +35,13 @@ namespace SocialMedia.Services
                 SenderId = senderId
                 
             };
-            await _repository.AddAsyn(requestDto);
+            var entity = new FriendRequest
+            {
+                SenderId = senderId,
+                RecieverId = receiverId,
+                status = Status.Pending
+            };
+            await _repository.AddAsync(entity);
         }
 
       

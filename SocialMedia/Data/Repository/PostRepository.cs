@@ -9,64 +9,35 @@ using SocialMedia.models;
 
 namespace SocialMedia.Data.Repository
 {
-    public class PostRepository : IPostRepository
+    public class PostRepository : Repository<Post> , IPostRepository
     {
         private readonly SocialContext _context;
         private readonly DbSet<Post> _Posts;
        
-        public PostRepository(SocialContext context)
+        public PostRepository(SocialContext context) : base(context)
         {
             _context = context;
             _Posts = _context.Posts;
 
         }
-        public async Task AddPostAsync(Post CreatePost)
+
+        public override async Task<Post?> GetByIdAsync(Guid id)
         {
-           
-            bool authorExists = await _context.Users.AnyAsync(u => u.Id == CreatePost.AuthorId);
 
-            if (authorExists)
-            {
-                _Posts.Add(CreatePost);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-             
-                throw new InvalidOperationException("Cannot create a post for a non-existent user.");
-            }
-        }
-
-        public async Task<bool> DeletePostAsync(Post posts)
-        {
-            _Posts.Remove(posts);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-  
-
-        public async Task<Post?> GetPostByIdAsync(Guid postId)
-        {
-           Post? post = await _Posts
+            Post? post = await _Posts
                                 .Include(p => p.Reactions).
-                                Where(a=>a.Id == postId).FirstOrDefaultAsync();
+                                Where(a => a.Id == id).FirstOrDefaultAsync();
 
-            if (post == null) {
-
-                return null;
-            }
             return post;
         }
-
-       
 
 
         public async Task<PagedResults<PostResponseDTO>> GetAllPosts(PostsFilterDTO filter, Guid? LoggedInUser)
         {
-            IQueryable<Post> query = _Posts.Include(p => p.Reactions).AsSplitQuery();
+            IQueryable<Post> query = _Posts.Include(p => p.Reactions);
+            //IQueryable<Post> query = _Posts.AsQueryable();
 
-            
+
             if (filter.UserId.HasValue)
             {
                 query = query.Where(p => p.AuthorId == filter.UserId.Value);
@@ -129,18 +100,6 @@ namespace SocialMedia.Data.Repository
                 TotalCount = totalCount
             };
         }
-
-
-        public async Task<bool> UpdatePostAsync(Post posts)
-        {
-            _Posts.Update(posts);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-
-
-       
 
 
     }
