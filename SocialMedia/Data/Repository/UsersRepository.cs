@@ -5,6 +5,7 @@ using SocialMedia.DTO;
 using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
+using SocialMedia.Models;
 
 namespace SocialMedia.Data.Repository
 {
@@ -12,11 +13,13 @@ namespace SocialMedia.Data.Repository
     {
         private readonly SocialContext _context;
         private readonly DbSet<User> _Users;
+        private readonly DbSet<FriendRequest> _FriendRequests;
 
         public UsersRepository(SocialContext context):base(context)
         {
             _context = context;
             _Users = _context.Users;
+            _FriendRequests = _context.FriendRequest;
 
         }
 
@@ -99,10 +102,96 @@ namespace SocialMedia.Data.Repository
 
         public async Task<User?> GetUserByEmailAsync(string Email)
         {
+           
             return await _Users.Where(u => u.Email == Email)
                                .FirstOrDefaultAsync();
 
 
+        }
+
+        public async Task<List<User>>? GetUserFriendListAsync(Guid UserId)
+        {
+            var user = _Users
+                         .SelectMany(u=>u.Requests)
+                          .Where(r=> r.RecieverId == UserId && r.status == Status.Accepted)
+                           .Select(u=> u.Sender.Email)
+                                    ;
+
+            string query = user.ToQueryString();
+
+          
+
+
+
+
+            //return await _context.Users
+            //    .Where(u => u.Id == UserId)
+            //    .Select(u => u.Friends) 
+            //    .FirstOrDefaultAsync();
+
+            return null;
+        
+           
+
+        }
+
+        public async Task<bool> AddFriendRequest(Guid SenderId, Guid ReciverId)
+        {
+
+            _FriendRequests.Add(new FriendRequest
+            {
+                SenderId = SenderId,
+                RecieverId = ReciverId,
+                status = Status.Pending
+            });
+
+            await _context.SaveChangesAsync();
+            return true;
+
+        }
+
+        public async Task<bool> FriendRequestExists(Guid SenderId, Guid ReciverId)
+        {
+            return await _FriendRequests
+                           .FirstOrDefaultAsync(fr => fr.SenderId == SenderId && fr.RecieverId == ReciverId)!=null;
+        }
+
+
+        public async Task<bool> UpdateFriendRequest(FriendRequest Request)
+        {
+
+            FriendRequest? existingRequest =  _FriendRequests.FirstOrDefault(fr => fr.SenderId == Request.SenderId && fr.RecieverId == Request.RecieverId);
+
+            if (existingRequest == null)
+                return false;
+
+
+            existingRequest.status = Request.status;
+            await _context.SaveChangesAsync();
+            return true;
+          
+
+        }
+
+
+        public async Task<PagedResults<FriendRequest>?> GetAllFriendRequests(Guid LoggedInUser,int pageSize , int page)
+        {
+            var requests = _FriendRequests
+                           .Where(fr => fr.RecieverId == LoggedInUser);
+
+            int totalRequests = await requests.CountAsync();
+
+            var results =await  requests
+                           .Skip((page - 1) * pageSize)
+                           .Take(pageSize)
+                           .ToListAsync();
+
+
+            return new PagedResults<FriendRequest>
+            {
+                Results = results,
+                TotalCount = totalRequests
+            };
         }
     }
 }

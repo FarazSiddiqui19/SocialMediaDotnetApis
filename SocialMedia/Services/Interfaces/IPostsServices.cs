@@ -19,7 +19,7 @@ namespace SocialMedia.Services.Interfaces
 
         Task<bool> PostReaction(ReactToPostDTO Reaction,Guid UserId);
 
-        Task<string> VerifyUser(ClaimsPrincipal User);
+   
 
      
 

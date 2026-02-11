@@ -19,10 +19,12 @@ namespace SocialMedia.Data.Config
                 .OnDelete(DeleteBehavior.Restrict); 
 
           
+           
+          
             builder.HasOne(f => f.Reciever)
-                .WithMany()
+                .WithMany(u => u.Requests)
                 .HasForeignKey(f => f.RecieverId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);        
         }
     }
 }

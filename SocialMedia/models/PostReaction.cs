@@ -4,7 +4,6 @@ namespace SocialMedia.models
 {
     public class PostReaction
     {
-        public Guid Id { get; set; }
 
         public Guid PostId { get; set; }
         public Guid UserId { get; set; }

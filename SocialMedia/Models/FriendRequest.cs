@@ -5,7 +5,7 @@ namespace SocialMedia.Models
   
     public class FriendRequest 
     {
-        public int id { get; set; }
+       
         
         public Guid SenderId { get; set; }
         public virtual User? Sender { get; set; }

@@ -18,10 +18,10 @@ namespace SocialMedia.models
       
         public virtual List<Post>? Posts { get; set; }
 
-        [NotMapped]
+    
         public virtual List<FriendRequest>? Requests { get; set; }
-        [NotMapped]
-        public virtual List<User>? Friends { get; set; }
+   
+       
 
     }
 }

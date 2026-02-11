@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialMedia.Data;
 using SocialMedia.DTO;
 using SocialMedia.DTO.FriendRequest;
 using SocialMedia.DTO.Users;
@@ -16,16 +17,17 @@ namespace SocialMedia.Controllers
     {
         private readonly IUsersServices _usersService;
         private readonly IEmailVerificationService _emailVerificationService;
-        private readonly IFriendRequestService _friendRequestService;
+      
+      
 
         public UserController(
             IUsersServices userServices,
-            IEmailVerificationService emailVerificationService,
-            IFriendRequestService friendRequestService)
+            IEmailVerificationService emailVerificationService)
         {
             _usersService = userServices;
             _emailVerificationService = emailVerificationService;
-            _friendRequestService = friendRequestService;
+           
+          
         }
 
        
@@ -37,7 +39,8 @@ namespace SocialMedia.Controllers
             var userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            var result = await _friendRequestService.GetFriendRequestsAsync(userId.Value, DTO);
+
+            var result =  await _usersService.GetAllFriendRequests(userId.Value,DTO.PageSize,DTO.Page);
             return Ok(result);
         }
 
@@ -48,18 +51,26 @@ namespace SocialMedia.Controllers
             var senderId = GetCurrentUserId();
             if (senderId == null) return Unauthorized();
 
-            await _friendRequestService.AddFriendRequestAsync(senderId.Value, receiverId);
+            await _usersService.SendFriendRequest(senderId.Value,receiverId);
+          
             return Ok("Friend request sent.");
         }
 
         [HttpPut("friend-requests/respond/{SenderId:guid}")]
         [Authorize]
-        public async Task<IActionResult> RespondToFriendRequest( [FromBody]Guid SenderId , Status status)
+        public async Task<IActionResult> RespondToFriendRequest( Guid SenderId,Status status)
         {
             var recipientId = GetCurrentUserId();
-            if (recipientId == null) return Unauthorized();
+            if(recipientId == null) return Unauthorized();
+           
 
-            await _friendRequestService.RespondToFriendRequestAsync(SenderId , recipientId.Value,status);
+            await _usersService.RespondToFriendRequest(new FriendRequest
+            {
+                SenderId = SenderId,
+                RecieverId = recipientId.Value,
+                status = status
+            });
+           
             return NoContent();
         }
 
@@ -71,6 +82,17 @@ namespace SocialMedia.Controllers
         {
             PagedResults<UserResponseDto> userslist = await _usersService.GetAllUsersAsync(filter);
             return Ok(userslist);
+        }
+
+        [HttpPost]
+        [Route("GetFriendList")]
+        [Authorize]
+        public async Task<IActionResult> GetFriendList([FromBody] UsersFilter filter)
+        {
+            var userId = GetCurrentUserId();
+            //if (userId == null) return Unauthorized();
+            //var friends = await _usersService.GetUserFriendListAsync(userId.Value);
+            return Ok();
         }
 
         [HttpPost]

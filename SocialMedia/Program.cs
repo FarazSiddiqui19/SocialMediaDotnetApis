@@ -89,7 +89,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddScoped<IUsersServices, UserServices>();
 builder.Services.AddScoped<IPostsServices, PostServices>();
-builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
+
 builder.Services.AddScoped<ITokenGeneratorService, TokenGeneratorService>();
 builder.Services.AddScoped<IPasswordHasherService,PasswordHasherService > ();
 
@@ -97,8 +97,8 @@ builder.Services.AddScoped<IPasswordHasherService,PasswordHasherService > ();
 
 builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<IPostReactionRepository, PostReactionRepository>();
-builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+
+
 
 builder.Services.Configure<HashConfig>(
     builder.Configuration.GetSection("Hash_Config"));

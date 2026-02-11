@@ -13,11 +13,13 @@ namespace SocialMedia.Data.Repository
     {
         private readonly SocialContext _context;
         private readonly DbSet<Post> _Posts;
-       
+        private readonly DbSet<PostReaction> _PostReaction;
+
         public PostRepository(SocialContext context) : base(context)
         {
             _context = context;
             _Posts = _context.Posts;
+            _PostReaction = _context.PostReactions;
 
         }
 
@@ -100,6 +102,37 @@ namespace SocialMedia.Data.Repository
                 TotalCount = totalCount
             };
         }
+
+        public Task<PostReaction?> GetUserReaction(Guid PostId, Guid UserId)
+        {
+            return _PostReaction.FirstOrDefaultAsync(r => r.PostId == PostId && r.UserId == UserId);
+
+
+        }
+
+        public async Task<bool> AddReaction(PostReaction reaction)
+        {
+            _PostReaction.Add(reaction);
+            await _context.SaveChangesAsync();
+            return true;
+
+        }
+
+        public async Task<bool> RemoveReaction(PostReaction reaction)
+        {
+            _PostReaction.Remove(reaction);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateReaction(PostReaction reaction)
+        {
+            _PostReaction.Update(reaction);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+
 
 
     }

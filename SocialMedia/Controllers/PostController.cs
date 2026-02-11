@@ -15,6 +15,7 @@ namespace SocialMedia.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostsServices _postService;
+       
       
 
         public PostController(IPostsServices postServices)
@@ -29,32 +30,34 @@ namespace SocialMedia.Controllers
         [Route("GetPostsList")]
         public async Task<ActionResult<PostResponseDTO>> Get([FromBody] PostsFilterDTO filters)
         {
+            Guid LoggedInUser = Guid.Empty;
 
-
-            string LoggedInUser = await _postService.VerifyUser(User);
-
-            if (LoggedInUser == string.Empty) {
+            GetCurrentUser(LoggedInUser);
+            
+            if (LoggedInUser == Guid.Empty) {
                 return Unauthorized();
             }
 
 
-            var postList = await _postService.GetAllPostsAsync(filters, Guid.Parse(LoggedInUser));
+            var postList = await _postService.GetAllPostsAsync(filters, LoggedInUser);
             return Ok(postList);
         }
 
         [HttpPost("/CreatePost")]
         public async Task<IActionResult> CreatePost([FromBody] CreatePostDTO newPost)
         {
-            string LoggedInUser = await _postService.VerifyUser(User);
+            Guid LoggedInUser = Guid.Empty;
 
-            if (LoggedInUser == string.Empty)
+            GetCurrentUser(LoggedInUser);
+
+            if (LoggedInUser == Guid.Empty)
             {
                 return Unauthorized();
             }
 
-            Guid UserId = Guid.Parse(LoggedInUser);
+           
 
-            PostResponseDTO createdPost = await _postService.CreatePostAsync(newPost,UserId);
+            PostResponseDTO createdPost = await _postService.CreatePostAsync(newPost, LoggedInUser);
             return CreatedAtAction(
                     nameof(GetPostByID),
                     createdPost
@@ -66,16 +69,16 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> ReactToPost([FromBody] ReactToPostDTO Reaction)
         {
 
-            string LoggedInUser = await _postService.VerifyUser(User);
+            Guid LoggedInUser = Guid.Empty;
 
-            if (LoggedInUser == string.Empty)
+            GetCurrentUser(LoggedInUser);
+
+            if (LoggedInUser == Guid.Empty)
             {
                 return Unauthorized();
             }
 
-            var UserId = Guid.Parse(LoggedInUser);
-
-            await _postService.PostReaction(Reaction,UserId);
+            await _postService.PostReaction(Reaction, LoggedInUser);
             
             return NoContent();
         }
@@ -83,13 +86,14 @@ namespace SocialMedia.Controllers
         [HttpGet("{Id:guid}")]
         public async Task<IActionResult> GetPostByID([FromRoute] Guid Id)
         {
-            string LoggedInUser = await _postService.VerifyUser(User);
+            Guid LoggedInUser = Guid.Empty;
 
-            if (LoggedInUser == string.Empty)
+            GetCurrentUser(LoggedInUser);
+
+            if (LoggedInUser == Guid.Empty)
             {
                 return Unauthorized();
             }
-
 
             var post = await _postService.GetPostByIdAsync(Id);
             if (post == null)
@@ -103,14 +107,16 @@ namespace SocialMedia.Controllers
         public async Task<IActionResult> DeletePost([FromRoute] Guid Id)
         {
 
-            string LoggedInUser = await _postService.VerifyUser(User);
+            Guid LoggedInUser = Guid.Empty;
 
-            if (LoggedInUser == string.Empty)
+            GetCurrentUser(LoggedInUser);
+
+            if (LoggedInUser == Guid.Empty)
             {
                 return Unauthorized();
             }
 
-         
+
 
             PostResponseDTO? post = await _postService.GetPostByIdAsync(Id);
 
@@ -119,7 +125,7 @@ namespace SocialMedia.Controllers
                 return NotFound();
             }
 
-            if(post.UserId.ToString() != LoggedInUser) 
+            if(post.UserId != LoggedInUser) 
             {
                 return Forbid();
             }
@@ -133,15 +139,17 @@ namespace SocialMedia.Controllers
         [HttpPut("{Id:guid}")]
         public async Task<IActionResult> UpdatePost([FromRoute] Guid Id, [FromBody] CreatePostDTO UpdatedPost)
         {
+            Guid LoggedInUser = Guid.Empty;
 
-            string LoggedInUser = await _postService.VerifyUser(User);
+            GetCurrentUser(LoggedInUser);
 
-            if (LoggedInUser == string.Empty)
+            if (LoggedInUser == Guid.Empty)
             {
                 return Unauthorized();
             }
 
-         
+
+
 
             PostResponseDTO? post = await _postService.GetPostByIdAsync(Id);
 
@@ -150,7 +158,7 @@ namespace SocialMedia.Controllers
                 return NotFound();
             }
 
-            if (post.UserId.ToString() != LoggedInUser)
+            if (post.UserId != LoggedInUser)
             {
                 return Forbid();
             }
@@ -158,6 +166,15 @@ namespace SocialMedia.Controllers
 
             await _postService.UpdatePostAsync(Id, UpdatedPost);
             return NoContent();
+        }
+
+
+
+        private void GetCurrentUser(Guid LoggedInUser)
+        {
+            Claim? userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            Guid.TryParse(userIdClaim.Value, out LoggedInUser);
+           
         }
     }
 }

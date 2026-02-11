@@ -5,6 +5,7 @@ using SocialMedia.DTO;
 using SocialMedia.DTO.Users;
 using SocialMedia.mappers;
 using SocialMedia.models;
+using SocialMedia.Models;
 using SocialMedia.Services.Interfaces;
 
 namespace SocialMedia.Services
@@ -13,20 +14,16 @@ namespace SocialMedia.Services
     {
         private readonly IUserRepository  _userRepository;
         private readonly ITokenGeneratorService _tokenGeneratorService;
-        private readonly IConfiguration _config;
         private readonly IPasswordHasherService _passwordHasherService;
-        private readonly IEmailVerificationService _emailVerificationService;
 
-        public UserServices(IUserRepository userRepository,IConfiguration config,
+        public UserServices(IUserRepository userRepository,
                             ITokenGeneratorService tokenGeneratorService,
-                            IPasswordHasherService passwordHasherService,
-                            IEmailVerificationService emailVerificationService) {
+                            IPasswordHasherService passwordHasherService) 
+        {
             _userRepository = userRepository;
             _tokenGeneratorService = tokenGeneratorService;
-            _config = config;
             _passwordHasherService = passwordHasherService;
-            _emailVerificationService = emailVerificationService;
-          
+            
         }
 
        
@@ -75,6 +72,8 @@ namespace SocialMedia.Services
 
         }
 
+      
+
         public async Task<Guid?> GetUserIdByEmailAsync(string? email)
         {
             Guid? userId = await _userRepository.GetUserByIdEmailAsync(email);
@@ -112,6 +111,31 @@ namespace SocialMedia.Services
             return true;
         }
 
+
+        public async Task<bool> SendFriendRequest(Guid SenderId, Guid RecieverId)
+        {
+            var existingRequest = await _userRepository.FriendRequestExists(SenderId, RecieverId);
+
+            if (existingRequest)
+                return false;
+
+            return await _userRepository.AddFriendRequest(SenderId, RecieverId);
+        }
+
+        public async Task<bool> RespondToFriendRequest(FriendRequest request)
+        {
+            var existingRequest = await _userRepository.FriendRequestExists(request.SenderId, request.RecieverId);
+
+            if (existingRequest)
+                return false;
+
+            return await _userRepository.UpdateFriendRequest(request);
+        }
+
+        public async Task<PagedResults<FriendRequest>?> GetAllFriendRequests(Guid LoggedInUser, int pageSize, int page)
+        {
+            return await _userRepository.GetAllFriendRequests(LoggedInUser, pageSize, page);
+        }
 
         public async Task<UserLoginResposeDTO?> LoginAsync(UserLoginDTO LoginRequest)
         {

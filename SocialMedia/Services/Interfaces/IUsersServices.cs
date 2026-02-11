@@ -1,6 +1,7 @@
 ﻿using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.DTO;
 using SocialMedia.DTO.Users;
+using SocialMedia.Models;
 using System.Threading.Tasks;
 
 namespace SocialMedia.Services.Interfaces
@@ -17,6 +18,14 @@ namespace SocialMedia.Services.Interfaces
         Task<bool> UpdateUserAsync(Guid id, CreateUserDTO dto);
 
         Task<Guid?> GetUserIdByEmailAsync(string? email);
+
+    
+
+        Task<bool> SendFriendRequest(Guid SenderId , Guid RecieverId);
+
+        Task<bool> RespondToFriendRequest(FriendRequest request);
+
+        Task<PagedResults<FriendRequest>?> GetAllFriendRequests(Guid LoggedInUser, int pageSize, int page);
 
 
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMedia.Data;
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(SocialContext))]
-    partial class SocialContextModelSnapshot : ModelSnapshot
+    [Migration("20260123102943_Test2")]
+    partial class Test2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,12 +33,17 @@ namespace SocialMedia.Migrations
                     b.Property<Guid>("RecieverId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("status")
                         .HasColumnType("integer");
 
                     b.HasKey("SenderId", "RecieverId");
 
                     b.HasIndex("RecieverId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FriendRequest");
                 });
@@ -113,7 +121,7 @@ namespace SocialMedia.Migrations
             modelBuilder.Entity("SocialMedia.Models.FriendRequest", b =>
                 {
                     b.HasOne("SocialMedia.models.User", "Reciever")
-                        .WithMany("Requests")
+                        .WithMany()
                         .HasForeignKey("RecieverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -123,6 +131,10 @@ namespace SocialMedia.Migrations
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("SocialMedia.models.User", null)
+                        .WithMany("Requests")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Reciever");
 

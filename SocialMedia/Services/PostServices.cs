@@ -13,15 +13,14 @@ namespace SocialMedia.Services
     public class PostServices : IPostsServices
     {
         private readonly IPostRepository _postRepository;
-        private readonly IPostReactionRepository _postReactionRepository;
+      
 
 
 
 
-        public PostServices(IPostRepository postRepository, IPostReactionRepository postReactionRepository)
+        public PostServices(IPostRepository postRepository)
         {
             _postRepository = postRepository;
-            _postReactionRepository = postReactionRepository;
 
         }
 
@@ -86,10 +85,6 @@ namespace SocialMedia.Services
                 return null;
             }
 
-            List<PostReaction>? reactions = post.Reactions;
-
-
-
             return post.ToDTO(Guid.Empty);
         }
 
@@ -111,12 +106,12 @@ namespace SocialMedia.Services
 
         public async Task<bool> PostReaction(ReactToPostDTO Reaction,Guid UserId)
         {
-            PostReaction? existingReaction = await _postReactionRepository.GetUserReactionToPostAsync(Reaction.PostId, UserId);
+            PostReaction? existingReaction = await _postRepository.GetUserReaction(Reaction.PostId, UserId);
            
             if (existingReaction == null)
             {
                 PostReaction newReaction = Reaction.ToEntity(UserId);
-                await _postReactionRepository.AddAsync(newReaction);
+                await _postRepository.AddReaction(newReaction);
 
             }
             else
@@ -124,14 +119,14 @@ namespace SocialMedia.Services
                 if (existingReaction.Type == Reaction.Type)
                 {
 
-                    await _postReactionRepository.DeleteAsync(existingReaction);
+                    await _postRepository.RemoveReaction(existingReaction);
 
                 }
                 else
                 {
 
                     existingReaction.Type = Reaction.Type;
-                    await _postReactionRepository.UpdateAsync(existingReaction);
+                    await _postRepository.UpdateReaction(existingReaction);
                 }
 
             }
@@ -141,19 +136,6 @@ namespace SocialMedia.Services
 
         }
 
-
-        public async Task<string> VerifyUser(ClaimsPrincipal User)
-        {
-            if (User.Claims.Any(c => c.Type == ClaimTypes.NameIdentifier))
-            {
-                return User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-             
-            }
-
-
-            return string.Empty;
-
-        }
 
 
 
